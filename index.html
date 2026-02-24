@@ -103,7 +103,7 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 <div class="header">
   <h1>Will Frontier AI Labs Make Money?</h1>
   <p class="subtitle">An interactive simulation of frontier lab economics using a differentiated Cournot oligopoly model</p>
-  <p class="model-note">Each firm's variable profit = V &middot; (2 / (2 + &gamma;(N&minus;1)))&sup2; where V = market potential, &gamma; = substitutability, N = competitors</p>
+  <p class="model-note">Profit per firm = V &middot; (2 / (2 + &gamma;(N&minus;1)))&sup2; &times; (Capex / Ref)&alpha; &minus; Costs &nbsp;|&nbsp; More compute &rarr; more revenue (diminishing returns). Calibrated to Anthropic data.</p>
 </div>
 
 <div class="tabs">
@@ -120,11 +120,11 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="control-group">
         <h3>Market</h3>
         <div class="slider-row"><label>Market Potential</label>
-          <input type="range" id="s-VBase0" min="20" max="1000" step="5" value="75">
-          <span class="val" id="v-VBase0">$75B</span></div>
+          <input type="range" id="s-VBase0" min="3" max="200" step="1" value="10">
+          <span class="val" id="v-VBase0">$10B</span></div>
         <div class="slider-row"><label>Demand Growth</label>
-          <input type="range" id="s-demandGrowth" min="5" max="70" step="1" value="35">
-          <span class="val" id="v-demandGrowth">35%</span></div>
+          <input type="range" id="s-demandGrowth" min="10" max="100" step="1" value="70">
+          <span class="val" id="v-demandGrowth">70%</span></div>
       </div>
       <div class="control-group">
         <h3>Competition</h3>
@@ -132,26 +132,26 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
           <input type="range" id="s-nFrontier" min="2" max="6" step="1" value="3">
           <span class="val" id="v-nFrontier">3</span></div>
         <div class="slider-row"><label>Substitutability (&gamma;)</label>
-          <input type="range" id="s-gamma" min="0" max="100" step="1" value="85">
-          <span class="val" id="v-gamma">0.85</span></div>
+          <input type="range" id="s-gamma" min="0" max="100" step="1" value="80">
+          <span class="val" id="v-gamma">0.80</span></div>
       </div>
       <div class="control-group">
         <h3>Costs</h3>
-        <div class="slider-row"><label>Compute Spend</label>
-          <input type="range" id="s-initialCapex" min="2" max="30" step="1" value="8">
-          <span class="val" id="v-initialCapex">$8B</span></div>
+        <div class="slider-row"><label>Yr 1 Compute (ann.)</label>
+          <input type="range" id="s-initialCapex" min="1" max="20" step="0.5" value="2.5">
+          <span class="val" id="v-initialCapex">$2.5B</span></div>
         <div class="slider-row"><label>Capex Growth</label>
-          <input type="range" id="s-capexGrowth" min="5" max="50" step="1" value="20">
-          <span class="val" id="v-capexGrowth">20%</span></div>
+          <input type="range" id="s-capexGrowth" min="10" max="80" step="1" value="50">
+          <span class="val" id="v-capexGrowth">50%</span></div>
       </div>
       <div class="control-group">
         <h3>Open Source</h3>
         <div class="slider-row"><label>OS Quality</label>
-          <input type="range" id="s-osQuality0" min="0" max="95" step="1" value="65">
-          <span class="val" id="v-osQuality0">0.65</span></div>
+          <input type="range" id="s-osQuality0" min="0" max="95" step="1" value="50">
+          <span class="val" id="v-osQuality0">0.50</span></div>
         <div class="slider-row"><label>OS Substitutability</label>
-          <input type="range" id="s-osSub" min="0" max="90" step="1" value="45">
-          <span class="val" id="v-osSub">0.45</span></div>
+          <input type="range" id="s-osSub" min="0" max="90" step="1" value="40">
+          <span class="val" id="v-osSub">0.40</span></div>
       </div>
       <div class="control-group">
         <h3>Switching Costs</h3>
@@ -166,8 +166,8 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="advanced-content" id="adv-content">
         <div class="control-group" style="margin-top:.6rem">
           <div class="slider-row"><label>Talent Cost</label>
-            <input type="range" id="s-talentCost0" min="1" max="8" step="0.5" value="3">
-            <span class="val" id="v-talentCost0">$3B</span></div>
+            <input type="range" id="s-talentCost0" min="0.5" max="8" step="0.5" value="1">
+            <span class="val" id="v-talentCost0">$1B</span></div>
           <div class="slider-row"><label>Talent Growth</label>
             <input type="range" id="s-talentGrowth" min="0" max="30" step="1" value="12">
             <span class="val" id="v-talentGrowth">12%</span></div>
@@ -254,8 +254,8 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 </div>
 
 <div class="footer">
-  Built with a differentiated Cournot oligopoly model (Singh &amp; Vives, 1984). All computations run client-side.
-  <br>Model parameters are illustrative &mdash; adjust them to match your own assumptions.
+  Built with a differentiated Cournot oligopoly model (Singh &amp; Vives, 1984) + compute capacity factor. All computations run client-side.
+  <br>Historical data: Anthropic (gold markers). Model projects an average frontier firm. More compute spend &rarr; more revenue captured (diminishing returns).
 </div>
 
 <script>
@@ -269,10 +269,20 @@ function cournotMargin(n,g,mc){mc=mc||0.05;return(1-mc)/(1+mc*(1+g*(n-1)))}
 function adjMarketPotential(V,osQ,osS,sw,sup){
   var d=osQ*osS;var va=V*Math.pow(1-d,2);va+=sw*V*0.4;va*=(sup||1);return va;
 }
+// Compute capacity factor: more annual compute spend = more revenue captured (diminishing returns)
+// refCapex = the "normal" spend needed to fully participate in the market
+// alpha controls diminishing returns (0.4 = strong diminishing returns)
+function computeCapacityFactor(capex,refCapex,alpha){
+  alpha=alpha||0.4;refCapex=refCapex||8;
+  if(capex<=0)return 0;
+  return Math.min(Math.pow(capex/refCapex,alpha),2.0); // cap at 2x to prevent runaway
+}
 function runSim(p){
   var ny=p.nYears||10,r={year:[],revenue:[],fixedCost:[],netProfit:[],cumProfit:[],
-    npvCum:[],VBase:[],VEff:[],osQ:[],sw:[],capex:[],talent:[],gamma:[]};
+    npvCum:[],VBase:[],VEff:[],osQ:[],sw:[],capex:[],talent:[],gamma:[],computeFactor:[]};
   var cp=0,cn=0;
+  // Reference capex grows with market — what you'd "need" to spend to keep pace
+  var refCapex0=p.refCapex||8;
   for(var t=0;t<ny;t++){
     var vb=p.VBase0*Math.pow(1+p.demandGrowth,t);
     var cx=p.initialCapex*Math.pow(1+p.capexGrowth,t);
@@ -281,9 +291,13 @@ function runSim(p){
     var sc=Math.min(p.switchCost0+p.switchGrowth*t,p.switchMax||0.4);
     var gm=Math.min(Math.max(p.gamma+p.gammaDrift*t,0),1);
     var su=(p.supplyConstraint0||1)+p.supplyConstraintGrowth*t;
-    var fc=cx+tl+(p.otherFixed||1);
+    var fc=cx+tl+(p.otherFixed!=null?p.otherFixed:1);
     var ve=adjMarketPotential(vb,oq,p.osSub,sc,su);
-    var vp=cournotVarProfit(ve,p.nFrontier,gm);
+    // Reference capex grows at 15% per year (industry baseline growth)
+    var refCx=refCapex0*Math.pow(1.15,t);
+    var cf=computeCapacityFactor(cx,refCx,p.computeAlpha||0.4);
+    // Revenue is now: Cournot share of market × compute capacity factor
+    var vp=cournotVarProfit(ve,p.nFrontier,gm)*cf;
     var np_=vp-fc;
     var mg=cournotMargin(p.nFrontier,gm);
     var rv=vp/Math.max(mg,0.01);
@@ -291,6 +305,7 @@ function runSim(p){
     r.year.push(START_YEAR+t);r.revenue.push(rv);r.fixedCost.push(fc);r.netProfit.push(np_);
     r.cumProfit.push(cp);r.npvCum.push(cn);r.VBase.push(vb);r.VEff.push(ve);
     r.osQ.push(oq);r.sw.push(sc);r.capex.push(cx);r.talent.push(tl);r.gamma.push(gm);
+    r.computeFactor.push(cf);
   }
   r.totalCapex=r.capex.reduce((a,b)=>a+b,0);
   return r;
@@ -299,27 +314,30 @@ function runSim(p){
 // ===========================
 // PRESETS
 // ===========================
-var BASE={VBase0:75,demandGrowth:0.35,nFrontier:3,gamma:0.85,gammaDrift:0,
-  initialCapex:8,capexGrowth:0.20,talentCost0:3,talentGrowth:0.12,otherFixed:1,
-  osQuality0:0.65,osCatchUp:0.03,osMaxQuality:0.95,osSub:0.45,
+// Calibrated to Anthropic actuals: ~$1B rev 2024, ~$4.5B rev 2025, ~$14B ARR by Feb 2026
+// Model represents an avg frontier firm. Anthropic gold markers are firm-specific reference.
+var BASE={VBase0:10,demandGrowth:0.70,nFrontier:3,gamma:0.80,gammaDrift:0,
+  initialCapex:2.5,capexGrowth:0.50,talentCost0:1,talentGrowth:0.15,otherFixed:0.3,
+  osQuality0:0.50,osCatchUp:0.03,osMaxQuality:0.95,osSub:0.40,
   switchCost0:0.08,switchGrowth:0.015,switchMax:0.4,
-  supplyConstraint0:1,supplyConstraintGrowth:0,nYears:10,discountRate:0.10};
+  supplyConstraint0:1,supplyConstraintGrowth:0,nYears:10,discountRate:0.10,
+  refCapex:2.5,computeAlpha:0.4};
 
 var PRESETS={
   base:Object.assign({},BASE),
-  bear:Object.assign({},BASE,{gamma:0.95,demandGrowth:0.25,osQuality0:0.75,osCatchUp:0.04,
-    osSub:0.65,switchCost0:0.03,switchGrowth:0.005,initialCapex:10,capexGrowth:0.30,nFrontier:4}),
-  bull:Object.assign({},BASE,{gamma:0.65,gammaDrift:-0.02,demandGrowth:0.45,osQuality0:0.55,
-    osCatchUp:0.02,osSub:0.35,switchCost0:0.15,switchGrowth:0.03,capexGrowth:0.18}),
-  agi:Object.assign({},BASE,{demandGrowth:0.40,gamma:0.80,switchCost0:0.10,switchGrowth:0.02,
-    supplyConstraintGrowth:0.12,capexGrowth:0.25})
+  bear:Object.assign({},BASE,{gamma:0.95,demandGrowth:0.45,osQuality0:0.70,osCatchUp:0.04,
+    osSub:0.60,switchCost0:0.03,switchGrowth:0.005,initialCapex:3,capexGrowth:0.55,nFrontier:4}),
+  bull:Object.assign({},BASE,{gamma:0.60,gammaDrift:-0.02,demandGrowth:0.85,osQuality0:0.40,
+    osCatchUp:0.02,osSub:0.30,switchCost0:0.15,switchGrowth:0.03,capexGrowth:0.40}),
+  agi:Object.assign({},BASE,{demandGrowth:0.80,gamma:0.75,switchCost0:0.10,switchGrowth:0.02,
+    supplyConstraintGrowth:0.12,capexGrowth:0.50})
 };
 var PRESET_LABELS={bear:'Bear Case',base:'Base Case',bull:'Bull Case',agi:'AGI Demand Shock'};
 var PRESET_COLORS={bear:'#dc2626',base:'#2563eb',bull:'#16a34a',agi:'#7c3aed'};
 var PRESET_NOTES={
-  bear:'Near-perfect substitutes, fast OS catch-up, 4 competitors, high capex growth',
-  base:'High substitutability, moderate OS pressure, 3 competitors',
-  bull:'Meaningful differentiation, strong switching costs, slower OS',
+  bear:'Near-perfect substitutes, fast OS catch-up, 4 competitors, runaway capex',
+  base:'High substitutability, moderate OS pressure, 3 competitors. Calibrated to Anthropic 2024-2025.',
+  bull:'Meaningful differentiation, strong switching costs, explosive demand growth',
   agi:'Supply constraints create scarcity rents as demand outpaces compute'
 };
 
@@ -330,10 +348,11 @@ function getParams(){
   return{VBase0:+gv('VBase0'),demandGrowth:gv('demandGrowth')/100,nFrontier:+gv('nFrontier'),
     gamma:gv('gamma')/100,gammaDrift:gv('gammaDrift')/100,initialCapex:+gv('initialCapex'),
     capexGrowth:gv('capexGrowth')/100,talentCost0:+gv('talentCost0'),talentGrowth:gv('talentGrowth')/100,
-    otherFixed:1,osQuality0:gv('osQuality0')/100,osCatchUp:gv('osCatchUp')/100,osMaxQuality:0.95,
+    otherFixed:0.3,osQuality0:gv('osQuality0')/100,osCatchUp:gv('osCatchUp')/100,osMaxQuality:0.95,
     osSub:gv('osSub')/100,switchCost0:gv('switchCost0')/100,switchGrowth:gv('switchGrowth')/100,
     switchMax:0.4,supplyConstraint0:1,supplyConstraintGrowth:gv('supplyGrowth')/100,
-    nYears:10,discountRate:gv('discountRate')/100};
+    nYears:10,discountRate:gv('discountRate')/100,
+    refCapex:2.5,computeAlpha:0.4};
 }
 function gv(id){return document.getElementById('s-'+id).value}
 function setParams(p){
@@ -379,11 +398,22 @@ var plotLayout={margin:{l:55,r:20,t:40,b:45},font:{family:'-apple-system,sans-se
   paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',
   xaxis:{gridcolor:'#e2e8f0',dtick:1},yaxis:{gridcolor:'#e2e8f0'}};
 
-// "Today" vertical line shape (between 2025 and 2026)
-var todayLine={type:'line',x0:2025.5,x1:2025.5,y0:0,y1:1,yref:'paper',
+// "Today" vertical line at Jan 2026
+var todayLine={type:'line',x0:2026,x1:2026,y0:0,y1:1,yref:'paper',
   line:{color:'#94a3b8',width:1.5,dash:'dash'}};
-var todayAnnotation={x:2025.5,y:1.02,yref:'paper',text:'Today',showarrow:false,
+var todayAnnotation={x:2026,y:1.02,yref:'paper',text:'Jan 2026',showarrow:false,
   font:{size:11,color:'#94a3b8'},xanchor:'center'};
+
+// ===========================
+// ANTHROPIC HISTORICAL DATA
+// ===========================
+// Anthropic actual revenue (annualized run-rate → actual annual revenue estimates)
+// 2024: ~$1B revenue, 2025: started $1B ARR → $4B mid-year → $9B end-year, ~$4-5B actual collected
+var HIST_REVENUE=[1.0, 4.5]; // 2024, 2025 actual annual revenue ($B)
+var HIST_YEARS=[2024, 2025];
+// Estimated costs (capex + talent + other): Anthropic spent ~$2B in 2024, ~$6B in 2025
+var HIST_COSTS=[2.0, 6.0];
+var HIST_PROFIT=HIST_REVENUE.map(function(r,i){return r-HIST_COSTS[i]});
 
 // ===========================
 // CHART UPDATES
@@ -400,20 +430,41 @@ function updateSimCharts(){
 
   var zeroLine={type:'line',x0:START_YEAR,x1:lastYr,y0:0,y1:0,line:{color:'#94a3b8',width:1,dash:'dot'}};
 
+  // Split model data into historical (2024-2025) and projected (2026+)
+  var histIdx=HIST_YEARS.length; // first 2 years overlap with historicals
+  var projYears=r.year.slice(histIdx);
+  var projRevenue=r.revenue.slice(histIdx);
+  var projCosts=r.fixedCost.slice(histIdx);
+  var projProfit=r.netProfit.slice(histIdx);
+  var projCum=r.cumProfit.slice(histIdx);
+  var projNpv=r.npvCum.slice(histIdx);
+  // Add a connecting point (last historical year) so lines are continuous
+  var connYear=[HIST_YEARS[HIST_YEARS.length-1]];
+
   // Chart 1: Revenue vs Costs
   Plotly.react('chart-rev-cost',[
-    {x:r.year,y:r.revenue,name:'Revenue',line:{color:PRESET_COLORS.base,width:2.5}},
-    {x:r.year,y:r.fixedCost,name:'Fixed Costs',line:{color:PRESET_COLORS.bear,width:2.5,dash:'dash'}}
-  ],Object.assign({},plotLayout,{title:'Revenue vs. Fixed Costs Per Firm',
+    {x:HIST_YEARS,y:HIST_REVENUE,name:'Anthropic Revenue (actual)',mode:'lines+markers',
+      line:{color:'#f59e0b',width:3},marker:{size:8,symbol:'diamond'}},
+    {x:HIST_YEARS,y:HIST_COSTS,name:'Anthropic Costs (est.)',mode:'lines+markers',
+      line:{color:'#f59e0b',width:3,dash:'dash'},marker:{size:8,symbol:'diamond'}},
+    {x:connYear.concat(projYears),y:[HIST_REVENUE[1]].concat(projRevenue),name:'Model Revenue',line:{color:PRESET_COLORS.base,width:2.5}},
+    {x:connYear.concat(projYears),y:[HIST_COSTS[1]].concat(projCosts),name:'Model Costs',line:{color:PRESET_COLORS.bear,width:2.5,dash:'dash'}}
+  ],Object.assign({},plotLayout,{title:'Revenue vs. Costs Per Firm',
     yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
     xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
     shapes:[todayLine],annotations:[todayAnnotation]}),plotCfg);
 
-  // Chart 2: Net Profit bars
-  var colors=r.netProfit.map(function(v){return v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'});
+  // Chart 2: Net Profit bars — historical + projected
+  var allYears=HIST_YEARS.concat(projYears);
+  var allProfit=HIST_PROFIT.concat(projProfit);
+  var colors=allProfit.map(function(v){return v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'});
+  // Mark historical bars with a pattern
+  var barColors=HIST_PROFIT.map(function(v){return v>=0?'rgba(245,158,11,0.7)':'rgba(245,158,11,0.7)'})
+    .concat(projProfit.map(function(v){return v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'}));
   Plotly.react('chart-profit-bar',[
-    {x:r.year,y:r.netProfit,type:'bar',marker:{color:colors}}
-  ],Object.assign({},plotLayout,{title:'Annual Net Profit',showlegend:false,
+    {x:allYears,y:allProfit,type:'bar',marker:{color:barColors},
+      hovertemplate:'%{x}: %{y:.1f}B<extra></extra>'}
+  ],Object.assign({},plotLayout,{title:'Annual Net Profit (gold = actual)',showlegend:false,
     yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
     xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
     shapes:[todayLine,zeroLine],annotations:[todayAnnotation]}),plotCfg);
@@ -467,18 +518,18 @@ function updateScenarios(){
 function updateSensitivity(){
   // Tornado chart
   var sensParams=[
-    ['demandGrowth',0.20,0.55,'Demand Growth Rate'],
+    ['demandGrowth',0.40,0.90,'Demand Growth Rate'],
     ['nFrontier',5,2,'# Competitors'],
-    ['VBase0',30,300,'Market Potential ($B)'],
-    ['osSub',0.70,0.25,'OS Substitutability'],
+    ['VBase0',5,30,'Market Potential ($B)'],
+    ['osSub',0.65,0.20,'OS Substitutability'],
     ['gamma',0.95,0.50,'Substitutability (γ)'],
-    ['capexGrowth',0.35,0.10,'Capex Growth Rate'],
-    ['initialCapex',15,5,'Initial Capex ($B)'],
-    ['osQuality0',0.80,0.45,'Open Source Quality'],
+    ['capexGrowth',0.65,0.30,'Capex Growth Rate'],
+    ['initialCapex',5,1,'Yr 1 Compute ($B)'],
+    ['osQuality0',0.70,0.30,'Open Source Quality'],
     ['osCatchUp',0.05,0.01,'OS Catch-up Rate'],
-    ['switchCost0',0.02,0.25,'Switching Costs'],
+    ['switchCost0',0.02,0.20,'Switching Costs'],
     ['switchGrowth',0.005,0.04,'Switch Cost Growth'],
-    ['talentCost0',5.0,2.0,'Talent Cost ($B)']
+    ['talentCost0',3.0,0.5,'Talent Cost ($B)']
   ];
   var baseNpv=runSim(BASE).npvCum[9];
   var impacts=[];
@@ -507,7 +558,7 @@ function updateSensitivity(){
   var gRows=40,dRows=40;
   var gRange=[],dRange=[],zData=[];
   for(var gi=0;gi<gRows;gi++){gRange.push(0.3+gi*0.7/(gRows-1))}
-  for(var di=0;di<dRows;di++){dRange.push(0.10+di*0.60/(dRows-1))}
+  for(var di=0;di<dRows;di++){dRange.push(0.20+di*0.70/(dRows-1))}
   for(var gi=0;gi<gRows;gi++){
     var row=[];
     for(var di=0;di<dRows;di++){
