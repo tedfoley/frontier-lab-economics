@@ -120,7 +120,7 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="control-group">
         <h3>Market</h3>
         <div class="slider-row"><label>Market Potential</label>
-          <input type="range" id="s-VBase0" min="20" max="200" step="5" value="75">
+          <input type="range" id="s-VBase0" min="20" max="1000" step="5" value="75">
           <span class="val" id="v-VBase0">$75B</span></div>
         <div class="slider-row"><label>Demand Growth</label>
           <input type="range" id="s-demandGrowth" min="5" max="70" step="1" value="35">
@@ -469,7 +469,7 @@ function updateSensitivity(){
   var sensParams=[
     ['demandGrowth',0.20,0.55,'Demand Growth Rate'],
     ['nFrontier',5,2,'# Competitors'],
-    ['VBase0',40,120,'Market Potential ($B)'],
+    ['VBase0',30,300,'Market Potential ($B)'],
     ['osSub',0.70,0.25,'OS Substitutability'],
     ['gamma',0.95,0.50,'Substitutability (γ)'],
     ['capexGrowth',0.35,0.10,'Capex Growth Rate'],
