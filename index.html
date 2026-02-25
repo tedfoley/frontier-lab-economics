@@ -19,7 +19,7 @@ a{color:var(--primary)}
 padding:2.5rem 2rem 2rem;text-align:center}
 .header h1{font-size:2rem;font-weight:700;margin-bottom:.3rem}
 .header .subtitle{color:#94a3b8;font-size:1.05rem;max-width:700px;margin:0 auto .8rem}
-.header .model-note{color:#64748b;font-size:.85rem;max-width:600px;margin:0 auto}
+.header .model-note{color:#64748b;font-size:.85rem;max-width:700px;margin:0 auto}
 
 /* Tabs */
 .tabs{display:flex;justify-content:center;gap:0;background:#1e293b;padding:0 2rem;
@@ -45,7 +45,7 @@ padding:1.25rem;box-shadow:var(--shadow);position:sticky;top:1rem;overflow:hidde
 .control-group h3{font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;
 color:var(--muted);margin-bottom:.6rem;padding-bottom:.3rem;border-bottom:1px solid var(--border)}
 .slider-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem}
-.slider-row label{flex:0 0 130px;font-size:.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slider-row label{flex:0 0 140px;font-size:.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .slider-row input[type=range]{flex:1 1 0;min-width:0;height:6px;-webkit-appearance:none;appearance:none;
 background:#e2e8f0;border-radius:3px;outline:none}
 .slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;
@@ -58,6 +58,11 @@ cursor:pointer;padding:.3rem 0;display:flex;align-items:center;gap:.3rem}
 .advanced-toggle .arrow.open{transform:rotate(90deg)}
 .advanced-content{display:none}
 .advanced-content.open{display:block}
+.checkbox-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem}
+.checkbox-row label{font-size:.82rem;color:var(--text)}
+.checkbox-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--primary)}
+.entry-exit-params{display:none;margin-left:1.5rem}
+.entry-exit-params.open{display:block}
 
 /* Presets */
 .presets{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.8rem;padding-top:.8rem;
@@ -102,8 +107,8 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 
 <div class="header">
   <h1>Will Frontier AI Labs Make Money?</h1>
-  <p class="subtitle">An interactive simulation of frontier lab economics using a differentiated Cournot oligopoly model</p>
-  <p class="model-note">Profit per firm = V &middot; (2 / (2 + &gamma;(N&minus;1)))&sup2; &times; (Capex / Ref)&alpha; &minus; Costs &nbsp;|&nbsp; More compute &rarr; more revenue (diminishing returns). Calibrated to Anthropic data.</p>
+  <p class="subtitle">An interactive simulation using a differentiated Cournot oligopoly with endogenous compute costs, Bertrand blending, and dynamic entry/exit</p>
+  <p class="model-note">q* = (a &minus; c) / (2 + &gamma;<sub>eff</sub>(N&minus;1)) &nbsp;|&nbsp; Revenue = p* &times; q* &nbsp;|&nbsp; Compute spend lowers marginal cost c with diminishing returns &nbsp;|&nbsp; Anthropic data shown for reference</p>
 </div>
 
 <div class="tabs">
@@ -119,29 +124,32 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
     <aside class="controls">
       <div class="control-group">
         <h3>Market</h3>
-        <div class="slider-row"><label>Market Potential</label>
-          <input type="range" id="s-VBase0" min="3" max="200" step="1" value="10">
-          <span class="val" id="v-VBase0">$10B</span></div>
+        <div class="slider-row"><label>Market Potential (V)</label>
+          <input type="range" id="s-VBase0" min="3" max="200" step="1" value="12">
+          <span class="val" id="v-VBase0">$12B</span></div>
         <div class="slider-row"><label>Demand Growth</label>
-          <input type="range" id="s-demandGrowth" min="10" max="100" step="1" value="70">
-          <span class="val" id="v-demandGrowth">70%</span></div>
+          <input type="range" id="s-demandGrowth" min="10" max="100" step="1" value="65">
+          <span class="val" id="v-demandGrowth">65%</span></div>
       </div>
       <div class="control-group">
         <h3>Competition</h3>
-        <div class="slider-row"><label># Competitors</label>
+        <div class="slider-row"><label># Competitors (N)</label>
           <input type="range" id="s-nFrontier" min="2" max="6" step="1" value="3">
           <span class="val" id="v-nFrontier">3</span></div>
         <div class="slider-row"><label>Substitutability (&gamma;)</label>
           <input type="range" id="s-gamma" min="0" max="100" step="1" value="80">
           <span class="val" id="v-gamma">0.80</span></div>
+        <div class="slider-row"><label>Price Competition (&beta;)</label>
+          <input type="range" id="s-beta" min="0" max="100" step="5" value="30">
+          <span class="val" id="v-beta">0.30</span></div>
       </div>
       <div class="control-group">
-        <h3>Costs</h3>
+        <h3>Compute</h3>
         <div class="slider-row"><label>Yr 1 Compute (ann.)</label>
-          <input type="range" id="s-initialCapex" min="1" max="20" step="0.5" value="2.5">
-          <span class="val" id="v-initialCapex">$2.5B</span></div>
+          <input type="range" id="s-initialCapex" min="0.5" max="10" step="0.5" value="1.5">
+          <span class="val" id="v-initialCapex">$1.5B</span></div>
         <div class="slider-row"><label>Capex Growth</label>
-          <input type="range" id="s-capexGrowth" min="10" max="80" step="1" value="50">
+          <input type="range" id="s-capexGrowth" min="10" max="100" step="1" value="50">
           <span class="val" id="v-capexGrowth">50%</span></div>
       </div>
       <div class="control-group">
@@ -152,12 +160,15 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
         <div class="slider-row"><label>OS Substitutability</label>
           <input type="range" id="s-osSub" min="0" max="90" step="1" value="40">
           <span class="val" id="v-osSub">0.40</span></div>
+        <div class="slider-row"><label>% Contestable by OS</label>
+          <input type="range" id="s-phi" min="10" max="90" step="5" value="50">
+          <span class="val" id="v-phi">50%</span></div>
       </div>
       <div class="control-group">
         <h3>Switching Costs</h3>
-        <div class="slider-row"><label>Switching Cost</label>
-          <input type="range" id="s-switchCost0" min="0" max="50" step="1" value="8">
-          <span class="val" id="v-switchCost0">0.08</span></div>
+        <div class="slider-row"><label>Switching Cost (s)</label>
+          <input type="range" id="s-switchCost0" min="0" max="50" step="1" value="10">
+          <span class="val" id="v-switchCost0">0.10</span></div>
       </div>
 
       <button class="advanced-toggle" onclick="toggleAdvanced()">
@@ -166,11 +177,11 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="advanced-content" id="adv-content">
         <div class="control-group" style="margin-top:.6rem">
           <div class="slider-row"><label>Talent Cost</label>
-            <input type="range" id="s-talentCost0" min="0.5" max="8" step="0.5" value="1">
-            <span class="val" id="v-talentCost0">$1B</span></div>
+            <input type="range" id="s-talentCost0" min="0.5" max="8" step="0.5" value="0.7">
+            <span class="val" id="v-talentCost0">$0.7B</span></div>
           <div class="slider-row"><label>Talent Growth</label>
-            <input type="range" id="s-talentGrowth" min="0" max="30" step="1" value="12">
-            <span class="val" id="v-talentGrowth">12%</span></div>
+            <input type="range" id="s-talentGrowth" min="0" max="30" step="1" value="20">
+            <span class="val" id="v-talentGrowth">20%</span></div>
           <div class="slider-row"><label>OS Catch-up Rate</label>
             <input type="range" id="s-osCatchUp" min="0" max="8" step="0.5" value="3">
             <span class="val" id="v-osCatchUp">0.03</span></div>
@@ -186,6 +197,24 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
           <div class="slider-row"><label>Discount Rate</label>
             <input type="range" id="s-discountRate" min="5" max="20" step="1" value="10">
             <span class="val" id="v-discountRate">10%</span></div>
+        </div>
+        <div class="control-group" style="margin-top:.6rem">
+          <h3>Entry / Exit</h3>
+          <div class="checkbox-row">
+            <input type="checkbox" id="s-entryExit">
+            <label for="s-entryExit">Enable dynamic entry/exit</label>
+          </div>
+          <div class="entry-exit-params" id="ee-params">
+            <div class="slider-row"><label>Exit Threshold ($B)</label>
+              <input type="range" id="s-exitThresh" min="3" max="20" step="1" value="8">
+              <span class="val" id="v-exitThresh">$8B</span></div>
+            <div class="slider-row"><label>Entry Threshold ($B)</label>
+              <input type="range" id="s-entryThresh" min="5" max="30" step="1" value="15">
+              <span class="val" id="v-entryThresh">$15B</span></div>
+            <div class="slider-row"><label>Look-back Years</label>
+              <input type="range" id="s-lookback" min="1" max="5" step="1" value="3">
+              <span class="val" id="v-lookback">3</span></div>
+          </div>
         </div>
       </div>
 
@@ -217,7 +246,7 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 <div id="tab-scenarios" class="tab-content">
   <div class="section-header">
     <h2>Scenario Comparison</h2>
-    <p>Four scenarios mapping to the key arguments: commoditization (Bear), moderate competition (Base), meaningful differentiation (Bull), and demand explosion with supply constraints (AGI Shock).</p>
+    <p>Four scenarios: commoditization (Bear), moderate competition (Base), meaningful differentiation (Bull), and demand explosion with supply constraints (AGI Shock).</p>
   </div>
   <div class="chart-row">
     <div class="chart-box"><div id="chart-sc-profit" style="height:380px"></div></div>
@@ -244,7 +273,7 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
     <h2>What Drives Profitability?</h2>
     <p>Tornado chart: each bar shows how much the 10-year NPV changes when a single parameter swings from its pessimistic to optimistic value, holding everything else at the base case.</p>
   </div>
-  <div class="chart-box"><div id="chart-tornado" style="height:480px"></div></div>
+  <div class="chart-box"><div id="chart-tornado" style="height:520px"></div></div>
   <div class="section-header" style="margin-top:2rem">
     <h2>Break-Even Frontier</h2>
     <p>What combinations of demand growth and substitutability lead to profitability? The black line is the break-even boundary. Green = profitable, red = unprofitable.</p>
@@ -254,371 +283,588 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 </div>
 
 <div class="footer">
-  Built with a differentiated Cournot oligopoly model (Singh &amp; Vives, 1984) + compute capacity factor. All computations run client-side.
-  <br>Historical data: Anthropic (gold markers). Model projects an average frontier firm. More compute spend &rarr; more revenue captured (diminishing returns).
+  Differentiated Cournot oligopoly (Singh &amp; Vives, 1984) with Bertrand blending, segmented OS pressure, endogenous compute costs, and optional entry/exit.
+  <br>Model represents a <em>representative frontier firm</em>, not any specific company. Anthropic data shown for reference. All computations run client-side.
 </div>
 
 <script>
-// ===========================
-// MODEL
-// ===========================
+// ================================================================
+// MODEL: Differentiated Cournot Oligopoly with Linear Demand
+// ================================================================
+// Reference: Singh & Vives (1984), "Price and Quantity Competition
+// in a Differentiated Duopoly"
+//
+// Demand for firm i: p_i = a - q_i - gamma_eff * SUM(q_j)
+// Cost: C(q_i) = c * q_i + F  (marginal cost c, fixed cost F)
+//
+// Symmetric Cournot equilibrium:
+//   q* = (a - c) / (2 + gamma_eff * (N-1))
+//   p* = a - q* * (1 + gamma_eff * (N-1))
+//   Revenue = p* * q*
+//   Variable Profit = (p* - c) * q* = (q*)^2
+//   Net Profit = Variable Profit - F
+//
+// Key innovations over naive implementation:
+//   1. Compute spend endogenized: higher capex -> lower marginal cost c
+//      via c = K * capex^(-eta), so more GPUs = cheaper to serve = more output
+//   2. Switching costs reduce effective gamma (Klemperer 1987)
+//   3. OS pressure segmented into contestable vs protected market
+//   4. Bertrand-Cournot blend: beta parameter erodes Cournot rents
+//   5. Dynamic entry/exit based on profit history
+// ================================================================
+
 var START_YEAR = 2024;
 
-function cournotVarProfit(V,n,g){return V*Math.pow(2/(2+g*(n-1)),2)}
-function cournotMargin(n,g,mc){mc=mc||0.05;return(1-mc)/(1+mc*(1+g*(n-1)))}
-function adjMarketPotential(V,osQ,osS,sw,sup){
-  var d=osQ*osS;var va=V*Math.pow(1-d,2);va+=sw*V*0.4;va*=(sup||1);return va;
+// Internal calibration constants (not user-facing)
+// K and eta calibrated so base case matches ~$1B rev in 2024, ~$4.5B in 2025
+var COST_K = 6.3;     // cost scaling constant
+var COST_ETA = 0.30;  // diminishing returns to compute investment
+
+/**
+ * Cournot equilibrium with linear differentiated demand.
+ * Demand: p_i = a - q_i - gamma * sum(q_j, j != i)
+ * Marginal cost: c per unit of output
+ *
+ * @param {number} a - Demand intercept (mapped from market potential: a = 2*sqrt(V_eff))
+ * @param {number} c - Marginal cost per unit (from compute cost mapping)
+ * @param {number} gamma - Effective substitutability in [0,1]
+ * @param {number} N - Number of symmetric firms
+ * @returns {{q:number, p:number, revenue:number, varProfit:number}}
+ */
+function cournotEquilibrium(a, c, gamma, N) {
+  var D = 2 + gamma * (N - 1);
+  var q = Math.max((a - c) / D, 0);
+  var p = a - q * (1 + gamma * (N - 1));
+  var revenue = p * q;
+  // Variable profit = (p-c)*q = ((a-c)/D)^2 = q^2 in symmetric equilibrium
+  var varProfit = q * q;
+  return { q: q, p: p, revenue: revenue, varProfit: varProfit };
 }
-// Compute capacity factor: more annual compute spend = more revenue captured (diminishing returns)
-// refCapex = the "normal" spend needed to fully participate in the market
-// alpha controls diminishing returns (0.4 = strong diminishing returns)
-function computeCapacityFactor(capex,refCapex,alpha){
-  alpha=alpha||0.4;refCapex=refCapex||8;
-  if(capex<=0)return 0;
-  return Math.min(Math.pow(capex/refCapex,alpha),2.0); // cap at 2x to prevent runaway
+
+/**
+ * Compute effective market parameters with OS segmentation and switching costs.
+ *
+ * Open source segmentation (Problem 4):
+ *   V_eff = V * [(1 - phi) + phi * (1 - osQ*osSub)^2] * supply
+ *   phi = contestable fraction; (1-phi) = enterprise-protected segment
+ *
+ * Switching costs as gamma reduction (Problem 2, Klemperer 1987):
+ *   gamma_eff = gamma * (1 - switchCost)
+ *   Higher switching costs = harder to switch = lower effective substitutability
+ *
+ * Demand intercept mapping:
+ *   a = 2*sqrt(V_eff) so that monopoly revenue = V_eff when c = 0
+ *
+ * @returns {{a:number, gamma_eff:number, V_eff:number}}
+ */
+function effectiveMarketParams(V, osQ, osSub, phi, switchCost, gamma, supply) {
+  var osDiscount = osQ * osSub;
+  // Protected segment (1-phi) is unaffected by OS; contestable segment phi gets discount
+  var V_eff = V * ((1 - phi) + phi * Math.pow(1 - osDiscount, 2));
+  V_eff *= (supply || 1);
+  var a = 2 * Math.sqrt(Math.max(V_eff, 0));
+  // Switching costs reduce effective substitutability
+  var gamma_eff = Math.max(gamma * (1 - switchCost), 0);
+  return { a: a, gamma_eff: gamma_eff, V_eff: V_eff };
 }
-function runSim(p){
-  var ny=p.nYears||10,r={year:[],revenue:[],fixedCost:[],netProfit:[],cumProfit:[],
-    npvCum:[],VBase:[],VEff:[],osQ:[],sw:[],capex:[],talent:[],gamma:[],computeFactor:[]};
-  var cp=0,cn=0;
-  // Reference capex grows with market — what you'd "need" to spend to keep pace
-  var refCapex0=p.refCapex||8;
-  for(var t=0;t<ny;t++){
-    var vb=p.VBase0*Math.pow(1+p.demandGrowth,t);
-    var cx=p.initialCapex*Math.pow(1+p.capexGrowth,t);
-    var tl=p.talentCost0*Math.pow(1+p.talentGrowth,t);
-    var oq=Math.min(p.osQuality0+p.osCatchUp*t,p.osMaxQuality||0.95);
-    var sc=Math.min(p.switchCost0+p.switchGrowth*t,p.switchMax||0.4);
-    var gm=Math.min(Math.max(p.gamma+p.gammaDrift*t,0),1);
-    var su=(p.supplyConstraint0||1)+p.supplyConstraintGrowth*t;
-    var fc=cx+tl+(p.otherFixed!=null?p.otherFixed:1);
-    var ve=adjMarketPotential(vb,oq,p.osSub,sc,su);
-    // Reference capex grows at 15% per year (industry baseline growth)
-    var refCx=refCapex0*Math.pow(1.15,t);
-    var cf=computeCapacityFactor(cx,refCx,p.computeAlpha||0.4);
-    // Revenue is now: Cournot share of market × compute capacity factor
-    var vp=cournotVarProfit(ve,p.nFrontier,gm)*cf;
-    var np_=vp-fc;
-    var mg=cournotMargin(p.nFrontier,gm);
-    var rv=vp/Math.max(mg,0.01);
-    cp+=np_;cn+=np_/Math.pow(1+p.discountRate,t);
-    r.year.push(START_YEAR+t);r.revenue.push(rv);r.fixedCost.push(fc);r.netProfit.push(np_);
-    r.cumProfit.push(cp);r.npvCum.push(cn);r.VBase.push(vb);r.VEff.push(ve);
-    r.osQ.push(oq);r.sw.push(sc);r.capex.push(cx);r.talent.push(tl);r.gamma.push(gm);
-    r.computeFactor.push(cf);
+
+/**
+ * Compute marginal cost from capex investment.
+ * More compute spend -> lower unit cost of serving customers (diminishing returns).
+ *
+ *   c = K * capex^(-eta)
+ *
+ * Intuition: doubling your GPU fleet doesn't halve your per-query cost,
+ * but it does reduce it. eta < 1 captures diminishing returns.
+ */
+function marginalCostFromCapex(capex) {
+  if (capex <= 0) return 1e6;
+  return COST_K * Math.pow(capex, -COST_ETA);
+}
+
+/**
+ * Bertrand-Cournot blend (Problem 6).
+ * Pure Cournot overestimates profits when firms compete on price (API pricing wars).
+ * Singh & Vives (1984) showed Bertrand yields lower profits for substitutes.
+ *
+ * Approximation: profit erosion factor = 1 - beta * gamma_eff * (N-1)/N
+ *   beta = 0: pure Cournot
+ *   beta = 1: maximum Bertrand erosion (at high gamma, profits approach zero)
+ *
+ * @param {number} varProfit - Cournot variable profit
+ * @param {number} beta - Price competition intensity [0,1]
+ * @param {number} gamma - Effective substitutability
+ * @param {number} N - Number of firms
+ * @returns {number} Adjusted variable profit
+ */
+function bertrandAdjustment(varProfit, beta, gamma, N) {
+  if (N <= 1) return varProfit;
+  var erosion = 1 - beta * gamma * (N - 1) / N;
+  return varProfit * Math.max(erosion, 0.01);
+}
+
+/**
+ * Entry/exit mechanism (Problem 5).
+ * Checks profit history to determine if a firm exits (sustained losses)
+ * or a new firm enters (sustained high profits attract entrants).
+ *
+ * @param {number[]} profitHistory - Per-firm net profit for each past year
+ * @param {number} exitThresh - Cumulative loss over lookback that triggers exit
+ * @param {number} entryThresh - Cumulative profit over lookback that triggers entry
+ * @param {number} lookback - Number of years to examine
+ * @returns {number} Change in N: -1, 0, or +1
+ */
+function entryExitDelta(profitHistory, exitThresh, entryThresh, lookback) {
+  if (profitHistory.length < lookback) return 0;
+  var recent = profitHistory.slice(-lookback);
+  var cumRecent = 0;
+  for (var i = 0; i < recent.length; i++) cumRecent += recent[i];
+
+  // Exit: sustained cumulative losses exceed threshold
+  if (cumRecent < -exitThresh) return -1;
+
+  // Entry: all recent years profitable and cumulative exceeds threshold
+  var allPos = true;
+  for (var i = 0; i < recent.length; i++) { if (recent[i] <= 0) { allPos = false; break; } }
+  if (allPos && cumRecent > entryThresh) return 1;
+
+  return 0;
+}
+
+/**
+ * Run 10-year simulation with all model features.
+ */
+function runSim(p) {
+  var ny = p.nYears || 10;
+  var r = {
+    year: [], revenue: [], totalCost: [], netProfit: [], cumProfit: [],
+    npvCum: [], VBase: [], VEff: [], osQ: [], sw: [], capex: [], talent: [],
+    gamma: [], gammaEff: [], nFirms: [], price: [], quantity: []
+  };
+  var cp = 0, cn = 0;
+  var N = p.nFrontier;
+  var profitHistory = [];
+
+  for (var t = 0; t < ny; t++) {
+    // Time-varying parameters
+    var vb = p.VBase0 * Math.pow(1 + p.demandGrowth, t);
+    var cx = p.initialCapex * Math.pow(1 + p.capexGrowth, t);
+    var tl = p.talentCost0 * Math.pow(1 + p.talentGrowth, t);
+    var oq = Math.min(p.osQuality0 + p.osCatchUp * t, p.osMaxQuality || 0.95);
+    var sc = Math.min(p.switchCost0 + p.switchGrowth * t, p.switchMax || 0.50);
+    var gm = Math.min(Math.max(p.gamma + (p.gammaDrift || 0) * t, 0), 1);
+    var su = (p.supplyConstraint0 || 1) + (p.supplyConstraintGrowth || 0) * t;
+    var phi = p.phi != null ? p.phi : 0.50;
+
+    // Total fixed cost: talent + overhead (displayed as part of total cost)
+    var fixedCost = tl + (p.otherFixed != null ? p.otherFixed : 0.3);
+
+    // Effective market parameters (OS segmentation + switching cost -> gamma)
+    var mkt = effectiveMarketParams(vb, oq, p.osSub, phi, sc, gm, su);
+
+    // Marginal cost from compute investment
+    var c = marginalCostFromCapex(cx);
+
+    // Cournot equilibrium
+    var eq = cournotEquilibrium(mkt.a, c, mkt.gamma_eff, N);
+
+    // Bertrand adjustment: price competition erodes Cournot rents
+    var beta = p.beta != null ? p.beta : 0;
+    var adjVP = bertrandAdjustment(eq.varProfit, beta, mkt.gamma_eff, N);
+
+    // Revenue scales proportionally with profit adjustment
+    var profitRatio = eq.varProfit > 0 ? adjVP / eq.varProfit : 0;
+    var rv = eq.revenue * profitRatio;
+
+    // Total cost = compute spend + talent + overhead
+    var tc = cx + fixedCost;
+
+    // Net profit = adjusted revenue - total cost
+    var np_ = rv - tc;
+
+    cp += np_;
+    cn += np_ / Math.pow(1 + (p.discountRate || 0.10), t);
+
+    // Entry/exit (Problem 5) — only when enabled
+    profitHistory.push(np_);
+    if (p.enableEntryExit) {
+      var delta = entryExitDelta(
+        profitHistory,
+        p.exitThreshold || 8,
+        p.entryThreshold || 15,
+        p.lookbackYears || 3
+      );
+      N = Math.max(1, Math.min(p.maxFirms || 6, N + delta));
+    }
+
+    // Store results
+    r.year.push(START_YEAR + t);
+    r.revenue.push(rv);
+    r.totalCost.push(tc);
+    r.netProfit.push(np_);
+    r.cumProfit.push(cp);
+    r.npvCum.push(cn);
+    r.VBase.push(vb);
+    r.VEff.push(mkt.V_eff);
+    r.osQ.push(oq);
+    r.sw.push(sc);
+    r.capex.push(cx);
+    r.talent.push(tl);
+    r.gamma.push(gm);
+    r.gammaEff.push(mkt.gamma_eff);
+    r.nFirms.push(N);
+    r.price.push(eq.p);
+    r.quantity.push(eq.q);
   }
-  r.totalCapex=r.capex.reduce((a,b)=>a+b,0);
+  r.totalCapex = r.capex.reduce(function(a, b) { return a + b; }, 0);
   return r;
 }
 
-// ===========================
+// ================================================================
 // PRESETS
-// ===========================
-// Calibrated to Anthropic actuals: ~$1B rev 2024, ~$4.5B rev 2025, ~$14B ARR by Feb 2026
-// Model represents an avg frontier firm. Anthropic gold markers are firm-specific reference.
-var BASE={VBase0:10,demandGrowth:0.70,nFrontier:3,gamma:0.80,gammaDrift:0,
-  initialCapex:2.5,capexGrowth:0.50,talentCost0:1,talentGrowth:0.15,otherFixed:0.3,
-  osQuality0:0.50,osCatchUp:0.03,osMaxQuality:0.95,osSub:0.40,
-  switchCost0:0.08,switchGrowth:0.015,switchMax:0.4,
-  supplyConstraint0:1,supplyConstraintGrowth:0,nYears:10,discountRate:0.10,
-  refCapex:2.5,computeAlpha:0.4};
+// ================================================================
+// Calibrated to approximate Anthropic 2024-2025:
+//   ~$1B revenue 2024, ~$4.5B revenue 2025
+// Model represents an average/representative frontier firm.
 
-var PRESETS={
-  base:Object.assign({},BASE),
-  bear:Object.assign({},BASE,{gamma:0.95,demandGrowth:0.45,osQuality0:0.70,osCatchUp:0.04,
-    osSub:0.60,switchCost0:0.03,switchGrowth:0.005,initialCapex:3,capexGrowth:0.55,nFrontier:4}),
-  bull:Object.assign({},BASE,{gamma:0.60,gammaDrift:-0.02,demandGrowth:0.85,osQuality0:0.40,
-    osCatchUp:0.02,osSub:0.30,switchCost0:0.15,switchGrowth:0.03,capexGrowth:0.40}),
-  agi:Object.assign({},BASE,{demandGrowth:0.80,gamma:0.75,switchCost0:0.10,switchGrowth:0.02,
-    supplyConstraintGrowth:0.12,capexGrowth:0.50})
-};
-var PRESET_LABELS={bear:'Bear Case',base:'Base Case',bull:'Bull Case',agi:'AGI Demand Shock'};
-var PRESET_COLORS={bear:'#dc2626',base:'#2563eb',bull:'#16a34a',agi:'#7c3aed'};
-var PRESET_NOTES={
-  bear:'Near-perfect substitutes, fast OS catch-up, 4 competitors, runaway capex',
-  base:'High substitutability, moderate OS pressure, 3 competitors. Calibrated to Anthropic 2024-2025.',
-  bull:'Meaningful differentiation, strong switching costs, explosive demand growth',
-  agi:'Supply constraints create scarcity rents as demand outpaces compute'
+var BASE = {
+  VBase0: 12, demandGrowth: 0.65, nFrontier: 3, gamma: 0.80, gammaDrift: 0,
+  initialCapex: 1.5, capexGrowth: 0.50,
+  talentCost0: 0.7, talentGrowth: 0.20, otherFixed: 0.3,
+  osQuality0: 0.50, osCatchUp: 0.03, osMaxQuality: 0.95, osSub: 0.40,
+  phi: 0.50,
+  switchCost0: 0.10, switchGrowth: 0.015, switchMax: 0.50,
+  beta: 0.30,
+  supplyConstraint0: 1, supplyConstraintGrowth: 0,
+  enableEntryExit: false, exitThreshold: 8, entryThreshold: 15, lookbackYears: 3, maxFirms: 6,
+  nYears: 10, discountRate: 0.10
 };
 
-// ===========================
+var PRESETS = {
+  base: Object.assign({}, BASE),
+  bear: Object.assign({}, BASE, {
+    gamma: 0.95, demandGrowth: 0.45, osQuality0: 0.70, osCatchUp: 0.04,
+    osSub: 0.60, phi: 0.65, switchCost0: 0.03, switchGrowth: 0.005,
+    initialCapex: 2.0, capexGrowth: 0.55, nFrontier: 4, beta: 0.50
+  }),
+  bull: Object.assign({}, BASE, {
+    gamma: 0.60, gammaDrift: -0.02, demandGrowth: 0.80, osQuality0: 0.40,
+    osCatchUp: 0.02, osSub: 0.30, phi: 0.35, switchCost0: 0.20,
+    switchGrowth: 0.03, capexGrowth: 0.45, beta: 0.10
+  }),
+  agi: Object.assign({}, BASE, {
+    demandGrowth: 0.75, gamma: 0.75, switchCost0: 0.12, switchGrowth: 0.02,
+    supplyConstraintGrowth: 0.12, capexGrowth: 0.50, beta: 0.25
+  })
+};
+var PRESET_LABELS = { bear: 'Bear Case', base: 'Base Case', bull: 'Bull Case', agi: 'AGI Demand Shock' };
+var PRESET_COLORS = { bear: '#dc2626', base: '#2563eb', bull: '#16a34a', agi: '#7c3aed' };
+var PRESET_NOTES = {
+  bear: 'Near-perfect substitutes, strong price competition, fast OS catch-up, 4 competitors, 65% market contestable',
+  base: 'Moderate competition and OS pressure, 3 firms, 50% contestable market. Calibrated to ~$1B rev 2024.',
+  bull: 'Meaningful differentiation, strong switching costs, weak price competition, 35% contestable',
+  agi: 'Supply constraints create scarcity rents as demand outpaces compute availability'
+};
+
+// ================================================================
 // SLIDER <-> PARAMS
-// ===========================
-function getParams(){
-  return{VBase0:+gv('VBase0'),demandGrowth:gv('demandGrowth')/100,nFrontier:+gv('nFrontier'),
-    gamma:gv('gamma')/100,gammaDrift:gv('gammaDrift')/100,initialCapex:+gv('initialCapex'),
-    capexGrowth:gv('capexGrowth')/100,talentCost0:+gv('talentCost0'),talentGrowth:gv('talentGrowth')/100,
-    otherFixed:0.3,osQuality0:gv('osQuality0')/100,osCatchUp:gv('osCatchUp')/100,osMaxQuality:0.95,
-    osSub:gv('osSub')/100,switchCost0:gv('switchCost0')/100,switchGrowth:gv('switchGrowth')/100,
-    switchMax:0.4,supplyConstraint0:1,supplyConstraintGrowth:gv('supplyGrowth')/100,
-    nYears:10,discountRate:gv('discountRate')/100,
-    refCapex:2.5,computeAlpha:0.4};
+// ================================================================
+function getParams() {
+  return {
+    VBase0: +gv('VBase0'), demandGrowth: gv('demandGrowth') / 100,
+    nFrontier: +gv('nFrontier'), gamma: gv('gamma') / 100, gammaDrift: gv('gammaDrift') / 100,
+    beta: gv('beta') / 100,
+    initialCapex: +gv('initialCapex'), capexGrowth: gv('capexGrowth') / 100,
+    talentCost0: +gv('talentCost0'), talentGrowth: gv('talentGrowth') / 100, otherFixed: 0.3,
+    osQuality0: gv('osQuality0') / 100, osCatchUp: gv('osCatchUp') / 100, osMaxQuality: 0.95,
+    osSub: gv('osSub') / 100, phi: gv('phi') / 100,
+    switchCost0: gv('switchCost0') / 100, switchGrowth: gv('switchGrowth') / 100, switchMax: 0.50,
+    supplyConstraint0: 1, supplyConstraintGrowth: gv('supplyGrowth') / 100,
+    enableEntryExit: document.getElementById('s-entryExit').checked,
+    exitThreshold: +gv('exitThresh'), entryThreshold: +gv('entryThresh'),
+    lookbackYears: +gv('lookback'), maxFirms: 6,
+    nYears: 10, discountRate: gv('discountRate') / 100
+  };
 }
-function gv(id){return document.getElementById('s-'+id).value}
-function setParams(p){
-  sv('VBase0',p.VBase0);sv('demandGrowth',p.demandGrowth*100);sv('nFrontier',p.nFrontier);
-  sv('gamma',p.gamma*100);sv('gammaDrift',(p.gammaDrift||0)*100);sv('initialCapex',p.initialCapex);
-  sv('capexGrowth',p.capexGrowth*100);sv('talentCost0',p.talentCost0);
-  sv('talentGrowth',p.talentGrowth*100);sv('osQuality0',p.osQuality0*100);
-  sv('osCatchUp',(p.osCatchUp||0.03)*100);sv('osSub',p.osSub*100);
-  sv('switchCost0',p.switchCost0*100);sv('switchGrowth',(p.switchGrowth||0.015)*100);
-  sv('supplyGrowth',(p.supplyConstraintGrowth||0)*100);sv('discountRate',p.discountRate*100);
+function gv(id) { return document.getElementById('s-' + id).value; }
+function setParams(p) {
+  sv('VBase0', p.VBase0); sv('demandGrowth', p.demandGrowth * 100); sv('nFrontier', p.nFrontier);
+  sv('gamma', p.gamma * 100); sv('gammaDrift', (p.gammaDrift || 0) * 100);
+  sv('beta', (p.beta != null ? p.beta : 0.30) * 100);
+  sv('initialCapex', p.initialCapex); sv('capexGrowth', p.capexGrowth * 100);
+  sv('talentCost0', p.talentCost0); sv('talentGrowth', p.talentGrowth * 100);
+  sv('osQuality0', p.osQuality0 * 100); sv('osCatchUp', (p.osCatchUp || 0.03) * 100);
+  sv('osSub', p.osSub * 100); sv('phi', (p.phi != null ? p.phi : 0.50) * 100);
+  sv('switchCost0', p.switchCost0 * 100); sv('switchGrowth', (p.switchGrowth || 0.015) * 100);
+  sv('supplyGrowth', (p.supplyConstraintGrowth || 0) * 100);
+  sv('discountRate', p.discountRate * 100);
+  document.getElementById('s-entryExit').checked = !!p.enableEntryExit;
+  sv('exitThresh', p.exitThreshold || 8); sv('entryThresh', p.entryThreshold || 15);
+  sv('lookback', p.lookbackYears || 3);
+  toggleEntryExit();
   updateLabels();
 }
-function sv(id,val){document.getElementById('s-'+id).value=val}
+function sv(id, val) { document.getElementById('s-' + id).value = val; }
 
-function updateLabels(){
-  dl('VBase0','$'+gv('VBase0')+'B');dl('demandGrowth',gv('demandGrowth')+'%');
-  dl('nFrontier',gv('nFrontier'));dl('gamma',(gv('gamma')/100).toFixed(2));
-  dl('initialCapex','$'+gv('initialCapex')+'B');dl('capexGrowth',gv('capexGrowth')+'%');
-  dl('talentCost0','$'+gv('talentCost0')+'B');dl('talentGrowth',gv('talentGrowth')+'%');
-  dl('osQuality0',(gv('osQuality0')/100).toFixed(2));
-  dl('osSub',(gv('osSub')/100).toFixed(2));
-  dl('osCatchUp',(gv('osCatchUp')/100).toFixed(2));
-  dl('switchCost0',(gv('switchCost0')/100).toFixed(2));
-  dl('switchGrowth',(gv('switchGrowth')/100).toFixed(3));
-  dl('gammaDrift',(gv('gammaDrift')/100).toFixed(2));
-  dl('supplyGrowth',(gv('supplyGrowth')/100).toFixed(2));
-  dl('discountRate',gv('discountRate')+'%');
+function updateLabels() {
+  dl('VBase0', '$' + gv('VBase0') + 'B'); dl('demandGrowth', gv('demandGrowth') + '%');
+  dl('nFrontier', gv('nFrontier')); dl('gamma', (gv('gamma') / 100).toFixed(2));
+  dl('beta', (gv('beta') / 100).toFixed(2));
+  dl('initialCapex', '$' + gv('initialCapex') + 'B'); dl('capexGrowth', gv('capexGrowth') + '%');
+  dl('talentCost0', '$' + gv('talentCost0') + 'B'); dl('talentGrowth', gv('talentGrowth') + '%');
+  dl('osQuality0', (gv('osQuality0') / 100).toFixed(2));
+  dl('osSub', (gv('osSub') / 100).toFixed(2));
+  dl('phi', gv('phi') + '%');
+  dl('osCatchUp', (gv('osCatchUp') / 100).toFixed(2));
+  dl('switchCost0', (gv('switchCost0') / 100).toFixed(2));
+  dl('switchGrowth', (gv('switchGrowth') / 100).toFixed(3));
+  dl('gammaDrift', (gv('gammaDrift') / 100).toFixed(2));
+  dl('supplyGrowth', (gv('supplyGrowth') / 100).toFixed(2));
+  dl('discountRate', gv('discountRate') + '%');
+  dl('exitThresh', '$' + gv('exitThresh') + 'B');
+  dl('entryThresh', '$' + gv('entryThresh') + 'B');
+  dl('lookback', gv('lookback'));
 }
-function dl(id,txt){document.getElementById('v-'+id).textContent=txt}
-function fmt(v){
-  if(Math.abs(v)>=1000)return(v>0?'$':'-$')+Math.abs(v/1000).toFixed(1)+'T';
-  if(Math.abs(v)>=1)return(v>0?'$':'-$')+Math.abs(v).toFixed(1)+'B';
-  return(v>0?'$':'-$')+(Math.abs(v)*1000).toFixed(0)+'M';
+function dl(id, txt) { document.getElementById('v-' + id).textContent = txt; }
+function fmt(v) {
+  if (Math.abs(v) >= 1000) return (v > 0 ? '$' : '-$') + Math.abs(v / 1000).toFixed(1) + 'T';
+  if (Math.abs(v) >= 1) return (v > 0 ? '$' : '-$') + Math.abs(v).toFixed(1) + 'B';
+  return (v > 0 ? '$' : '-$') + (Math.abs(v) * 1000).toFixed(0) + 'M';
 }
 
-// ===========================
+// ================================================================
 // CHART CONFIG
-// ===========================
-// Show modebar on hover with home (reset zoom), zoom, and pan buttons
-var plotCfg={displayModeBar:'hover',responsive:true,
-  modeBarButtonsToRemove:['select2d','lasso2d','toImage','sendDataToCloud','toggleSpikelines','hoverCompareCartesian','hoverClosestCartesian']};
-var plotLayout={margin:{l:55,r:20,t:40,b:45},font:{family:'-apple-system,sans-serif',size:12},
-  paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',
-  xaxis:{gridcolor:'#e2e8f0',dtick:1},yaxis:{gridcolor:'#e2e8f0'}};
+// ================================================================
+var plotCfg = { displayModeBar: 'hover', responsive: true,
+  modeBarButtonsToRemove: ['select2d', 'lasso2d', 'toImage', 'sendDataToCloud',
+    'toggleSpikelines', 'hoverCompareCartesian', 'hoverClosestCartesian'] };
+var plotLayout = { margin: { l: 55, r: 20, t: 40, b: 45 },
+  font: { family: '-apple-system,sans-serif', size: 12 },
+  paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+  xaxis: { gridcolor: '#e2e8f0', dtick: 1 }, yaxis: { gridcolor: '#e2e8f0' } };
 
-// ===========================
-// ANTHROPIC HISTORICAL DATA
-// ===========================
-// Anthropic actual revenue (annualized run-rate → actual annual revenue estimates)
-// 2024: ~$1B revenue, 2025: started $1B ARR → $4B mid-year → $9B end-year, ~$4-5B actual collected
-var HIST_REVENUE=[1.0, 4.5]; // 2024, 2025 actual annual revenue ($B)
-var HIST_YEARS=[2024, 2025];
-// Estimated costs (capex + talent + other): Anthropic spent ~$2B in 2024, ~$6B in 2025
-var HIST_COSTS=[2.0, 6.0];
-var HIST_PROFIT=HIST_REVENUE.map(function(r,i){return r-HIST_COSTS[i]});
+// ================================================================
+// ANTHROPIC REFERENCE DATA (Problem 7: shown separately, not as model output)
+// ================================================================
+var HIST_YEARS = [2024, 2025];
+var HIST_REVENUE = [1.0, 4.5];
+var HIST_COSTS = [2.0, 6.0];
+var HIST_PROFIT = [1.0 - 2.0, 4.5 - 6.0]; // [-1.0, -1.5]
 
-// ===========================
+// ================================================================
 // CHART UPDATES
-// ===========================
-function updateSimCharts(){
-  var p=getParams(),r=runSim(p);
-  var ny=r.year.length;
-  var lastYr=START_YEAR+ny-1;
+// ================================================================
+function updateSimCharts() {
+  var p = getParams(), r = runSim(p);
+  var ny = r.year.length;
+  var lastYr = START_YEAR + ny - 1;
+
   // Stats
-  setStatVal('stat-yr1',r.netProfit[0]);setStatVal('stat-yr10',r.netProfit[ny-1]);
-  setStatVal('stat-npv',r.npvCum[ny-1]);
-  document.getElementById('stat-capex').textContent=fmt(r.totalCapex);
-  document.getElementById('stat-capex').className='value';
+  setStatVal('stat-yr1', r.netProfit[0]);
+  setStatVal('stat-yr10', r.netProfit[ny - 1]);
+  setStatVal('stat-npv', r.npvCum[ny - 1]);
+  document.getElementById('stat-capex').textContent = fmt(r.totalCapex);
+  document.getElementById('stat-capex').className = 'value';
 
-  var zeroLine={type:'line',x0:START_YEAR,x1:lastYr,y0:0,y1:0,line:{color:'#94a3b8',width:1,dash:'dot'}};
+  var zeroLine = { type: 'line', x0: START_YEAR, x1: lastYr, y0: 0, y1: 0,
+    line: { color: '#94a3b8', width: 1, dash: 'dot' } };
 
-  // Split model data into historical (2024-2025) and projected (2026+)
-  var histIdx=HIST_YEARS.length; // first 2 years overlap with historicals
-  var projYears=r.year.slice(histIdx);
-  var projRevenue=r.revenue.slice(histIdx);
-  var projCosts=r.fixedCost.slice(histIdx);
-  var projProfit=r.netProfit.slice(histIdx);
-  var projCum=r.cumProfit.slice(histIdx);
-  var projNpv=r.npvCum.slice(histIdx);
-  // Add a connecting point (last historical year) so lines are continuous
-  var connYear=[HIST_YEARS[HIST_YEARS.length-1]];
+  // Chart 1: Revenue vs Costs — model for all years + Anthropic reference markers
+  Plotly.react('chart-rev-cost', [
+    { x: r.year, y: r.revenue, name: 'Model Revenue', line: { color: PRESET_COLORS.base, width: 2.5 } },
+    { x: r.year, y: r.totalCost, name: 'Model Costs', line: { color: PRESET_COLORS.bear, width: 2.5, dash: 'dash' } },
+    { x: HIST_YEARS, y: HIST_REVENUE, name: 'Anthropic Rev (ref)', mode: 'markers',
+      marker: { size: 10, symbol: 'diamond', color: '#f59e0b', line: { width: 1.5, color: '#b45309' } } },
+    { x: HIST_YEARS, y: HIST_COSTS, name: 'Anthropic Cost (ref)', mode: 'markers',
+      marker: { size: 10, symbol: 'diamond-open', color: '#f59e0b', line: { width: 2, color: '#b45309' } } }
+  ], Object.assign({}, plotLayout, { title: 'Revenue vs. Costs (Representative Firm)',
+    yaxis: Object.assign({}, plotLayout.yaxis, { title: '$B' }),
+    xaxis: Object.assign({}, plotLayout.xaxis, { title: '' }),
+    shapes: [], annotations: [] }), plotCfg);
 
-  // Chart 1: Revenue vs Costs
-  Plotly.react('chart-rev-cost',[
-    {x:HIST_YEARS,y:HIST_REVENUE,name:'Anthropic Revenue (actual)',mode:'lines+markers',
-      line:{color:'#f59e0b',width:3},marker:{size:8,symbol:'diamond'}},
-    {x:HIST_YEARS,y:HIST_COSTS,name:'Anthropic Costs (est.)',mode:'lines+markers',
-      line:{color:'#f59e0b',width:3,dash:'dash'},marker:{size:8,symbol:'diamond'}},
-    {x:connYear.concat(projYears),y:[HIST_REVENUE[1]].concat(projRevenue),name:'Model Revenue',line:{color:PRESET_COLORS.base,width:2.5}},
-    {x:connYear.concat(projYears),y:[HIST_COSTS[1]].concat(projCosts),name:'Model Costs',line:{color:PRESET_COLORS.bear,width:2.5,dash:'dash'}}
-  ],Object.assign({},plotLayout,{title:'Revenue vs. Costs Per Firm',
-    yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
-    xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[],annotations:[]}),plotCfg);
-
-  // Chart 2: Net Profit bars — historical + projected
-  var allYears=HIST_YEARS.concat(projYears);
-  var allProfit=HIST_PROFIT.concat(projProfit);
-  var colors=allProfit.map(function(v){return v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'});
-  // Mark historical bars with a pattern
-  var barColors=HIST_PROFIT.map(function(v){return v>=0?'rgba(245,158,11,0.7)':'rgba(245,158,11,0.7)'})
-    .concat(projProfit.map(function(v){return v>=0?'rgba(22,163,74,0.7)':'rgba(220,38,38,0.7)'}));
-  Plotly.react('chart-profit-bar',[
-    {x:allYears,y:allProfit,type:'bar',marker:{color:barColors},
-      hovertemplate:'%{x}: %{y:.1f}B<extra></extra>'}
-  ],Object.assign({},plotLayout,{title:'Annual Net Profit (gold = actual)',showlegend:false,
-    yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
-    xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[zeroLine],annotations:[]}),plotCfg);
+  // Chart 2: Net Profit bars
+  var barColors = r.netProfit.map(function(v) {
+    return v >= 0 ? 'rgba(22,163,74,0.7)' : 'rgba(220,38,38,0.7)';
+  });
+  Plotly.react('chart-profit-bar', [
+    { x: r.year, y: r.netProfit, type: 'bar', marker: { color: barColors },
+      hovertemplate: '%{x}: %{y:.1f}B<extra></extra>' }
+  ], Object.assign({}, plotLayout, { title: 'Annual Net Profit per Firm', showlegend: false,
+    yaxis: Object.assign({}, plotLayout.yaxis, { title: '$B' }),
+    xaxis: Object.assign({}, plotLayout.xaxis, { title: '' }),
+    shapes: [zeroLine], annotations: [] }), plotCfg);
 
   // Chart 3: Cumulative NPV
-  Plotly.react('chart-npv',[
-    {x:r.year,y:r.cumProfit,name:'Cumulative Profit',line:{color:PRESET_COLORS.base,width:2}},
-    {x:r.year,y:r.npvCum,name:'Cumulative NPV',line:{color:PRESET_COLORS.bull,width:2,dash:'dash'}}
-  ],Object.assign({},plotLayout,{title:'Cumulative Profit & NPV',
-    yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
-    xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[zeroLine],annotations:[]}),plotCfg);
+  Plotly.react('chart-npv', [
+    { x: r.year, y: r.cumProfit, name: 'Cumulative Profit', line: { color: PRESET_COLORS.base, width: 2 } },
+    { x: r.year, y: r.npvCum, name: 'Cumulative NPV', line: { color: PRESET_COLORS.bull, width: 2, dash: 'dash' } }
+  ], Object.assign({}, plotLayout, { title: 'Cumulative Profit & NPV',
+    yaxis: Object.assign({}, plotLayout.yaxis, { title: '$B' }),
+    xaxis: Object.assign({}, plotLayout.xaxis, { title: '' }),
+    shapes: [zeroLine], annotations: [] }), plotCfg);
 }
 
-function setStatVal(id,v){
-  var el=document.getElementById(id);
-  el.textContent=fmt(v);
-  el.className='value '+(v>=0?'positive':'negative');
+function setStatVal(id, v) {
+  var el = document.getElementById(id);
+  el.textContent = fmt(v);
+  el.className = 'value ' + (v >= 0 ? 'positive' : 'negative');
 }
 
-function updateScenarios(){
-  var traces1=[],traces2=[],tbody='';
-  var keys=['bear','base','bull','agi'];
-  var ny=10,lastYr=START_YEAR+ny-1;
-  keys.forEach(function(k){
-    var r=runSim(PRESETS[k]);
-    traces1.push({x:r.year,y:r.netProfit,name:PRESET_LABELS[k],
-      line:{color:PRESET_COLORS[k],width:2.5},mode:'lines+markers',marker:{size:5}});
-    traces2.push({x:r.year,y:r.npvCum,name:PRESET_LABELS[k],
-      line:{color:PRESET_COLORS[k],width:2.5},mode:'lines+markers',marker:{size:5}});
-    var c=function(v){return'<span style="color:'+(v>=0?'#16a34a':'#dc2626')+'">'+fmt(v)+'</span>'};
-    tbody+='<tr style="border-top:1px solid #e2e8f0"><td style="padding:.5rem 1rem;font-weight:600;color:'+
-      PRESET_COLORS[k]+'">'+PRESET_LABELS[k]+'</td><td style="padding:.5rem 1rem;text-align:right">'+
-      c(r.netProfit[0])+'</td><td style="padding:.5rem 1rem;text-align:right">'+c(r.netProfit[ny-1])+
-      '</td><td style="padding:.5rem 1rem;text-align:right">'+c(r.npvCum[ny-1])+
-      '</td><td style="padding:.5rem 1rem;text-align:right">'+fmt(r.totalCapex)+
-      '</td><td style="padding:.5rem 1rem;font-size:.8rem;color:#64748b">'+PRESET_NOTES[k]+'</td></tr>';
+function updateScenarios() {
+  var traces1 = [], traces2 = [], tbody = '';
+  var keys = ['bear', 'base', 'bull', 'agi'];
+  var ny = 10, lastYr = START_YEAR + ny - 1;
+  keys.forEach(function(k) {
+    var r = runSim(PRESETS[k]);
+    traces1.push({ x: r.year, y: r.netProfit, name: PRESET_LABELS[k],
+      line: { color: PRESET_COLORS[k], width: 2.5 }, mode: 'lines+markers', marker: { size: 5 } });
+    traces2.push({ x: r.year, y: r.npvCum, name: PRESET_LABELS[k],
+      line: { color: PRESET_COLORS[k], width: 2.5 }, mode: 'lines+markers', marker: { size: 5 } });
+    var c = function(v) { return '<span style="color:' + (v >= 0 ? '#16a34a' : '#dc2626') + '">' + fmt(v) + '</span>'; };
+    tbody += '<tr style="border-top:1px solid #e2e8f0"><td style="padding:.5rem 1rem;font-weight:600;color:' +
+      PRESET_COLORS[k] + '">' + PRESET_LABELS[k] + '</td><td style="padding:.5rem 1rem;text-align:right">' +
+      c(r.netProfit[0]) + '</td><td style="padding:.5rem 1rem;text-align:right">' + c(r.netProfit[ny - 1]) +
+      '</td><td style="padding:.5rem 1rem;text-align:right">' + c(r.npvCum[ny - 1]) +
+      '</td><td style="padding:.5rem 1rem;text-align:right">' + fmt(r.totalCapex) +
+      '</td><td style="padding:.5rem 1rem;font-size:.8rem;color:#64748b">' + PRESET_NOTES[k] + '</td></tr>';
   });
-  document.getElementById('sc-tbody').innerHTML=tbody;
-  var zeroLine={type:'line',x0:START_YEAR,x1:lastYr,y0:0,y1:0,line:{color:'#94a3b8',width:1,dash:'dot'}};
-  Plotly.react('chart-sc-profit',traces1,Object.assign({},plotLayout,{title:'Annual Net Profit per Firm',
-    yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
-    xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[zeroLine],annotations:[]}),plotCfg);
-  Plotly.react('chart-sc-npv',traces2,Object.assign({},plotLayout,{title:'Cumulative NPV per Firm',
-    yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
-    xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[zeroLine],annotations:[]}),plotCfg);
+  document.getElementById('sc-tbody').innerHTML = tbody;
+  var zeroLine = { type: 'line', x0: START_YEAR, x1: lastYr, y0: 0, y1: 0,
+    line: { color: '#94a3b8', width: 1, dash: 'dot' } };
+  Plotly.react('chart-sc-profit', traces1, Object.assign({}, plotLayout, {
+    title: 'Annual Net Profit per Firm',
+    yaxis: Object.assign({}, plotLayout.yaxis, { title: '$B' }),
+    xaxis: Object.assign({}, plotLayout.xaxis, { title: '' }),
+    shapes: [zeroLine], annotations: [] }), plotCfg);
+  Plotly.react('chart-sc-npv', traces2, Object.assign({}, plotLayout, {
+    title: 'Cumulative NPV per Firm',
+    yaxis: Object.assign({}, plotLayout.yaxis, { title: '$B' }),
+    xaxis: Object.assign({}, plotLayout.xaxis, { title: '' }),
+    shapes: [zeroLine], annotations: [] }), plotCfg);
 }
 
-function updateSensitivity(){
-  // Tornado chart
-  var sensParams=[
-    ['demandGrowth',0.40,0.90,'Demand Growth Rate'],
-    ['nFrontier',5,2,'# Competitors'],
-    ['VBase0',5,30,'Market Potential ($B)'],
-    ['osSub',0.65,0.20,'OS Substitutability'],
-    ['gamma',0.95,0.50,'Substitutability (γ)'],
-    ['capexGrowth',0.65,0.30,'Capex Growth Rate'],
-    ['initialCapex',5,1,'Yr 1 Compute ($B)'],
-    ['osQuality0',0.70,0.30,'Open Source Quality'],
-    ['osCatchUp',0.05,0.01,'OS Catch-up Rate'],
-    ['switchCost0',0.02,0.20,'Switching Costs'],
-    ['switchGrowth',0.005,0.04,'Switch Cost Growth'],
-    ['talentCost0',3.0,0.5,'Talent Cost ($B)']
+function updateSensitivity() {
+  // Tornado chart — includes new parameters (beta, phi)
+  var sensParams = [
+    ['demandGrowth', 0.35, 0.85, 'Demand Growth Rate'],
+    ['nFrontier', 5, 2, '# Competitors'],
+    ['VBase0', 5, 40, 'Market Potential ($B)'],
+    ['osSub', 0.65, 0.20, 'OS Substitutability'],
+    ['gamma', 0.95, 0.50, 'Substitutability (gamma)'],
+    ['capexGrowth', 0.65, 0.30, 'Capex Growth Rate'],
+    ['initialCapex', 4, 0.5, 'Yr 1 Compute ($B)'],
+    ['osQuality0', 0.75, 0.30, 'Open Source Quality'],
+    ['phi', 0.75, 0.25, '% Contestable by OS'],
+    ['beta', 0.60, 0.05, 'Price Competition (beta)'],
+    ['switchCost0', 0.02, 0.25, 'Switching Costs'],
+    ['talentCost0', 3.0, 0.3, 'Talent Cost ($B)'],
+    ['osCatchUp', 0.05, 0.01, 'OS Catch-up Rate'],
+    ['switchGrowth', 0.005, 0.04, 'Switch Cost Growth']
   ];
-  var baseNpv=runSim(BASE).npvCum[9];
-  var impacts=[];
-  sensParams.forEach(function(sp){
-    var pLow=Object.assign({},BASE);pLow[sp[0]]=sp[1];
-    var pHigh=Object.assign({},BASE);pHigh[sp[0]]=sp[2];
-    var nL=runSim(pLow).npvCum[9]-baseNpv;
-    var nH=runSim(pHigh).npvCum[9]-baseNpv;
-    impacts.push({name:sp[3],low:nL,high:nH,range:Math.abs(nH-nL)});
+  var baseNpv = runSim(BASE).npvCum[9];
+  var impacts = [];
+  sensParams.forEach(function(sp) {
+    var pLow = Object.assign({}, BASE); pLow[sp[0]] = sp[1];
+    var pHigh = Object.assign({}, BASE); pHigh[sp[0]] = sp[2];
+    var nL = runSim(pLow).npvCum[9] - baseNpv;
+    var nH = runSim(pHigh).npvCum[9] - baseNpv;
+    impacts.push({ name: sp[3], low: nL, high: nH, range: Math.abs(nH - nL) });
   });
-  impacts.sort(function(a,b){return a.range-b.range});
-  var names=impacts.map(function(i){return i.name});
-  var highs=impacts.map(function(i){return i.high});
-  var lows=impacts.map(function(i){return i.low});
-  Plotly.react('chart-tornado',[
-    {y:names,x:highs,type:'bar',orientation:'h',name:'Optimistic',marker:{color:'rgba(22,163,74,0.7)'}},
-    {y:names,x:lows,type:'bar',orientation:'h',name:'Pessimistic',marker:{color:'rgba(220,38,38,0.7)'}}
-  ],Object.assign({},plotLayout,{
-    title:'Sensitivity: Change in 10-Year NPV ($B)',barmode:'overlay',
-    margin:{l:170,r:30,t:40,b:50},
-    xaxis:Object.assign({},plotLayout.xaxis,{title:'Change in NPV ($B)',zeroline:true,zerolinewidth:2}),
-    yaxis:{automargin:true}
-  }),plotCfg);
+  impacts.sort(function(a, b) { return a.range - b.range; });
+  var names = impacts.map(function(i) { return i.name; });
+  var highs = impacts.map(function(i) { return i.high; });
+  var lows = impacts.map(function(i) { return i.low; });
+  Plotly.react('chart-tornado', [
+    { y: names, x: highs, type: 'bar', orientation: 'h', name: 'Optimistic',
+      marker: { color: 'rgba(22,163,74,0.7)' } },
+    { y: names, x: lows, type: 'bar', orientation: 'h', name: 'Pessimistic',
+      marker: { color: 'rgba(220,38,38,0.7)' } }
+  ], Object.assign({}, plotLayout, {
+    title: 'Sensitivity: Change in 10-Year NPV ($B)', barmode: 'overlay',
+    margin: { l: 180, r: 30, t: 40, b: 50 },
+    xaxis: Object.assign({}, plotLayout.xaxis, { title: 'Change in NPV ($B)', zeroline: true, zerolinewidth: 2 }),
+    yaxis: { automargin: true }
+  }), plotCfg);
 
   // Break-even heatmap
-  var gRows=40,dRows=40;
-  var gRange=[],dRange=[],zData=[];
-  for(var gi=0;gi<gRows;gi++){gRange.push(0.3+gi*0.7/(gRows-1))}
-  for(var di=0;di<dRows;di++){dRange.push(0.20+di*0.70/(dRows-1))}
-  for(var gi=0;gi<gRows;gi++){
-    var row=[];
-    for(var di=0;di<dRows;di++){
-      var pp=Object.assign({},BASE);pp.gamma=gRange[gi];pp.demandGrowth=dRange[di];
+  var gRows = 40, dRows = 40;
+  var gRange = [], dRange = [], zData = [];
+  for (var gi = 0; gi < gRows; gi++) { gRange.push(0.3 + gi * 0.7 / (gRows - 1)); }
+  for (var di = 0; di < dRows; di++) { dRange.push(0.20 + di * 0.70 / (dRows - 1)); }
+  for (var gi = 0; gi < gRows; gi++) {
+    var row = [];
+    for (var di = 0; di < dRows; di++) {
+      var pp = Object.assign({}, BASE); pp.gamma = gRange[gi]; pp.demandGrowth = dRange[di];
       row.push(runSim(pp).npvCum[9]);
     }
     zData.push(row);
   }
-  var xLabels=dRange.map(function(d){return(d*100).toFixed(0)+'%'});
-  var yLabels=gRange.map(function(g){return g.toFixed(2)});
-  // Find nearest grid indices for scenario markers
-  function nearestX(val){return(val*100).toFixed(0)+'%'}
-  function nearestY(val){return val.toFixed(2)}
-  Plotly.react('chart-breakeven',[{
-    z:zData,x:xLabels,y:yLabels,
-    type:'heatmap',colorscale:[[0,'#dc2626'],[0.5,'#fefce8'],[1,'#16a34a']],
-    zmid:0,colorbar:{title:'NPV ($B)'}
-  },{
-    x:xLabels,y:yLabels,z:zData,
-    type:'contour',contours:{start:0,end:0,size:1},showscale:false,
-    line:{color:'black',width:3},ncontours:1
-  }],Object.assign({},plotLayout,{
-    title:'Break-Even Frontier: Demand Growth vs. Substitutability',
-    margin:{l:60,r:30,t:40,b:60},
-    xaxis:{title:'Annual Demand Growth Rate'},yaxis:{title:'Substitutability (γ)'},
-    annotations:[
-      {x:nearestX(BASE.demandGrowth),y:nearestY(BASE.gamma),text:'<b>Base</b>',
-       showarrow:true,arrowhead:2,ax:40,ay:-35,
-       font:{size:12,color:'#1e293b'},bgcolor:'rgba(255,255,255,0.85)',borderpad:3},
-      {x:nearestX(PRESETS.bear.demandGrowth),y:nearestY(PRESETS.bear.gamma),text:'<b>Bear</b>',
-       showarrow:true,arrowhead:2,ax:-55,ay:5,
-       font:{size:12,color:'#dc2626'},bgcolor:'rgba(255,255,255,0.85)',borderpad:3},
-      {x:nearestX(PRESETS.bull.demandGrowth),y:nearestY(PRESETS.bull.gamma),text:'<b>Bull</b>',
-       showarrow:true,arrowhead:2,ax:10,ay:45,
-       font:{size:12,color:'#16a34a'},bgcolor:'rgba(255,255,255,0.85)',borderpad:3}
+  var xLabels = dRange.map(function(d) { return (d * 100).toFixed(0) + '%'; });
+  var yLabels = gRange.map(function(g) { return g.toFixed(2); });
+  function nearestX(val) { return (val * 100).toFixed(0) + '%'; }
+  function nearestY(val) { return val.toFixed(2); }
+  Plotly.react('chart-breakeven', [{
+    z: zData, x: xLabels, y: yLabels,
+    type: 'heatmap', colorscale: [[0, '#dc2626'], [0.5, '#fefce8'], [1, '#16a34a']],
+    zmid: 0, colorbar: { title: 'NPV ($B)' }
+  }, {
+    x: xLabels, y: yLabels, z: zData,
+    type: 'contour', contours: { start: 0, end: 0, size: 1 }, showscale: false,
+    line: { color: 'black', width: 3 }, ncontours: 1
+  }], Object.assign({}, plotLayout, {
+    title: 'Break-Even Frontier: Demand Growth vs. Substitutability',
+    margin: { l: 60, r: 30, t: 40, b: 60 },
+    xaxis: { title: 'Annual Demand Growth Rate' }, yaxis: { title: 'Substitutability (gamma)' },
+    annotations: [
+      { x: nearestX(BASE.demandGrowth), y: nearestY(BASE.gamma), text: '<b>Base</b>',
+        showarrow: true, arrowhead: 2, ax: 40, ay: -35,
+        font: { size: 12, color: '#1e293b' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 },
+      { x: nearestX(PRESETS.bear.demandGrowth), y: nearestY(PRESETS.bear.gamma), text: '<b>Bear</b>',
+        showarrow: true, arrowhead: 2, ax: -55, ay: 5,
+        font: { size: 12, color: '#dc2626' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 },
+      { x: nearestX(PRESETS.bull.demandGrowth), y: nearestY(PRESETS.bull.gamma), text: '<b>Bull</b>',
+        showarrow: true, arrowhead: 2, ax: 10, ay: 45,
+        font: { size: 12, color: '#16a34a' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 }
     ]
-  }),plotCfg);
+  }), plotCfg);
 }
 
-// ===========================
+// ================================================================
 // UI HANDLERS
-// ===========================
-function toggleAdvanced(){
-  var c=document.getElementById('adv-content');
-  var a=document.getElementById('adv-arrow');
-  c.classList.toggle('open');a.classList.toggle('open');
+// ================================================================
+function toggleAdvanced() {
+  var c = document.getElementById('adv-content');
+  var a = document.getElementById('adv-arrow');
+  c.classList.toggle('open'); a.classList.toggle('open');
 }
-function loadPreset(name){
-  setParams(PRESETS[name]);updateSimCharts();
+function toggleEntryExit() {
+  var checked = document.getElementById('s-entryExit').checked;
+  var params = document.getElementById('ee-params');
+  if (checked) params.classList.add('open');
+  else params.classList.remove('open');
+}
+function loadPreset(name) {
+  setParams(PRESETS[name]); updateSimCharts();
 }
 
 // Tab switching
-document.querySelectorAll('.tab-btn').forEach(function(btn){
-  btn.addEventListener('click',function(){
-    document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
-    document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active')});
+document.querySelectorAll('.tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
     btn.classList.add('active');
-    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
-    if(btn.dataset.tab==='scenarios')updateScenarios();
-    if(btn.dataset.tab==='sensitivity')updateSensitivity();
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'scenarios') updateScenarios();
+    if (btn.dataset.tab === 'sensitivity') updateSensitivity();
   });
 });
 
-// Slider events
-document.querySelectorAll('input[type=range]').forEach(function(s){
-  s.addEventListener('input',function(){updateLabels();updateSimCharts()});
+// Slider & checkbox events
+document.querySelectorAll('input[type=range]').forEach(function(s) {
+  s.addEventListener('input', function() { updateLabels(); updateSimCharts(); });
+});
+document.getElementById('s-entryExit').addEventListener('change', function() {
+  toggleEntryExit(); updateSimCharts();
 });
 
 // Init
