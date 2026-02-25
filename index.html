@@ -398,12 +398,6 @@ var plotLayout={margin:{l:55,r:20,t:40,b:45},font:{family:'-apple-system,sans-se
   paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',
   xaxis:{gridcolor:'#e2e8f0',dtick:1},yaxis:{gridcolor:'#e2e8f0'}};
 
-// "Today" vertical line at Jan 2026
-var todayLine={type:'line',x0:2026,x1:2026,y0:0,y1:1,yref:'paper',
-  line:{color:'#94a3b8',width:1.5,dash:'dash'}};
-var todayAnnotation={x:2026,y:1.02,yref:'paper',text:'Jan 2026',showarrow:false,
-  font:{size:11,color:'#94a3b8'},xanchor:'center'};
-
 // ===========================
 // ANTHROPIC HISTORICAL DATA
 // ===========================
@@ -452,7 +446,7 @@ function updateSimCharts(){
   ],Object.assign({},plotLayout,{title:'Revenue vs. Costs Per Firm',
     yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
     xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[todayLine],annotations:[todayAnnotation]}),plotCfg);
+    shapes:[],annotations:[]}),plotCfg);
 
   // Chart 2: Net Profit bars — historical + projected
   var allYears=HIST_YEARS.concat(projYears);
@@ -467,7 +461,7 @@ function updateSimCharts(){
   ],Object.assign({},plotLayout,{title:'Annual Net Profit (gold = actual)',showlegend:false,
     yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
     xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[todayLine,zeroLine],annotations:[todayAnnotation]}),plotCfg);
+    shapes:[zeroLine],annotations:[]}),plotCfg);
 
   // Chart 3: Cumulative NPV
   Plotly.react('chart-npv',[
@@ -476,7 +470,7 @@ function updateSimCharts(){
   ],Object.assign({},plotLayout,{title:'Cumulative Profit & NPV',
     yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
     xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[todayLine,zeroLine],annotations:[todayAnnotation]}),plotCfg);
+    shapes:[zeroLine],annotations:[]}),plotCfg);
 }
 
 function setStatVal(id,v){
@@ -508,11 +502,11 @@ function updateScenarios(){
   Plotly.react('chart-sc-profit',traces1,Object.assign({},plotLayout,{title:'Annual Net Profit per Firm',
     yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
     xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[todayLine,zeroLine],annotations:[todayAnnotation]}),plotCfg);
+    shapes:[zeroLine],annotations:[]}),plotCfg);
   Plotly.react('chart-sc-npv',traces2,Object.assign({},plotLayout,{title:'Cumulative NPV per Firm',
     yaxis:Object.assign({},plotLayout.yaxis,{title:'$B'}),
     xaxis:Object.assign({},plotLayout.xaxis,{title:''}),
-    shapes:[todayLine,zeroLine],annotations:[todayAnnotation]}),plotCfg);
+    shapes:[zeroLine],annotations:[]}),plotCfg);
 }
 
 function updateSensitivity(){
