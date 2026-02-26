@@ -623,7 +623,8 @@ var PRESETS = {
   bear: Object.assign({}, BASE, {
     gamma: 0.92, nFrontier: 5, switchCost0: 0.03, switchGrowth: 0.005,
     osQuality0: 0.65, osCatchUp: 0.04, osSub: 0.55, phi: 0.65,
-    D0: 0.12, Dmax: 0.45, gCapBase: 0.20, lambda: 0.03,
+    D0: 0.12, Dmax: 0.60, gCapBase: 0.20, lambda: 0.03,
+    capexGrowth: 0.80,
     Smax: 1.10, sigmaBase: 1.70
   }),
   bull: Object.assign({}, BASE, {
@@ -642,7 +643,7 @@ var PRESETS = {
 var PRESET_LABELS = { bear: 'Bear Case', base: 'Base Case', bull: 'Bull Case', agi: 'AGI Shock' };
 var PRESET_COLORS = { bear: '#dc2626', base: '#2563eb', bull: '#16a34a', agi: '#7c3aed' };
 var PRESET_NOTES = {
-  bear: 'Near-perfect substitutes, 5 competitors, fast OS catch-up, strong overcapacity pricing, slower TAM growth',
+  bear: 'Near-perfect substitutes, 5 competitors, fast OS catch-up, strong overcapacity pricing. Bear thesis: margin destruction, not market absence — revenue is real but profitability takes ~8 years.',
   base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. Calibrated to ~$2-3B rev 2024 (OpenAI-scale representative firm).',
   bull: 'Meaningful differentiation, 3 firms, strong switching costs, large addressable market, fast TAM growth',
   agi: 'Transformative capability breakthrough: massive TAM ($250B+), explosive growth, demand outpaces even aggressive investment'
