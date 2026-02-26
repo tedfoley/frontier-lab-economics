@@ -191,9 +191,6 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
         </div>
         <div class="control-group">
           <h3>Market Structure</h3>
-          <div class="slider-row"><label>TAM Ceiling ($B)</label>
-            <input type="range" id="s-TAMCeiling" min="500" max="5000" step="100" value="1600">
-            <span class="val" id="v-TAMCeiling">$1600B</span></div>
           <div class="slider-row"><label>TAM Growth Rate</label>
             <input type="range" id="s-gCapBase" min="10" max="50" step="1" value="30">
             <span class="val" id="v-gCapBase">30%</span></div>
@@ -372,7 +369,7 @@ function runSim(p) {
   };
 
   var cp = 0, cn = 0;
-  var prevDfrontier = 0;
+  var prevDfrontier = 0, prevTAM = p.TAM0;
 
   for (var t = 0; t < ny; t++) {
     // === INVESTMENT with delayed deceleration ===
@@ -391,7 +388,7 @@ function runSim(p) {
     }
     var I_t = capexArr[t];
     var talent = p.talentCost0 * Math.pow(1 + p.talentGrowth, t);
-    var totalCost = I_t + talent + (p.overhead || 0.3);
+    var totalCost = I_t + talent + (p.overhead || 0.5);
 
     // === CAPACITY (from past investment, delayed by tau) ===
     // Before tau: use preInvestFrac * initialCapex as legacy capacity
@@ -399,22 +396,24 @@ function runSim(p) {
     if (t >= p.tau) {
       I_past = capexArr[t - p.tau];
     } else {
-      I_past = p.initialCapex * (p.preInvestFrac || 2.5);
+      I_past = p.initialCapex * (p.preInvestFrac || 0.8);
     }
     var eta = (p.eta0 || 1) * Math.pow(1 + p.etaGrowth, t);
     var K_i = p.theta * I_past * eta;
     var K_total = N * K_i;
 
-    // === DEMAND: TAM driven by cumulative training ===
+    // === DEMAND: TAM driven by cumulative training (iterative) ===
     var cumTraining = 0;
     for (var s = 0; s <= t; s++) {
       cumTraining += N * (1 - p.theta) * capexArr[s];
     }
     var cumTraining0 = N * (1 - p.theta) * p.initialCapex;
     var logRatio = Math.log(Math.max(cumTraining / cumTraining0, 1));
-    var gCap = p.gCapBase + (p.lambda || 0.08) * logRatio;
-    var TAM_raw = p.TAM0 * Math.pow(1 + gCap, t);
-    var TAM = Math.min(TAM_raw, p.TAMCeiling || 500);
+    var gCap = p.gCapBase + (p.lambda || 0.06) * logRatio;
+    var TAM;
+    if (t === 0) { TAM = p.TAM0; }
+    else { TAM = prevTAM * (1 + gCap); }
+    prevTAM = TAM;
 
     // === DEMAND: Bass diffusion S-curve ===
     // Overcapacity accelerates adoption (price cuts drive adoption)
@@ -513,7 +512,7 @@ function runSim(p) {
 var BASE = {
   initialCapex: 2.5, capexGrowth: 1.80, capexDecel: 0.60, decelStart: 2,
   theta: 0.55, eta0: 1.0, etaGrowth: 0.10, tau: 2, preInvestFrac: 0.8,
-  TAM0: 70, gCapBase: 0.30, lambda: 0.10, TAMCeiling: 1600,
+  TAM0: 70, gCapBase: 0.30, lambda: 0.06,
   D0: 0.10, Dmax: 0.55, rdBase: 0.50, kappa: 0.12,
   nFrontier: 4, gamma: 0.75, gammaDrift: 0,
   switchCost0: 0.10, switchGrowth: 0.015, switchMax: 0.50,
@@ -531,17 +530,17 @@ var PRESETS = {
   bear: Object.assign({}, BASE, {
     gamma: 0.92, nFrontier: 5, switchCost0: 0.03, switchGrowth: 0.005,
     osQuality0: 0.65, osCatchUp: 0.04, osSub: 0.55, phi: 0.65,
-    TAMCeiling: 800, Dmax: 0.45, gCapBase: 0.20,
+    Dmax: 0.45, gCapBase: 0.20, lambda: 0.03,
     Smax: 1.10, sigmaBase: 2.00
   }),
   bull: Object.assign({}, BASE, {
     gamma: 0.55, nFrontier: 3, switchCost0: 0.20, switchGrowth: 0.025,
     osQuality0: 0.40, osCatchUp: 0.02, osSub: 0.30, phi: 0.35,
-    TAMCeiling: 2000, Dmax: 0.65, D0: 0.12, gCapBase: 0.35,
+    Dmax: 0.65, D0: 0.12, gCapBase: 0.35, lambda: 0.07,
     Smax: 1.50, rho: 0.35, sigmaBase: 1.20
   }),
   agi: Object.assign({}, BASE, {
-    TAM0: 100, TAMCeiling: 3000, gCapBase: 0.40, lambda: 0.12,
+    TAM0: 100, gCapBase: 0.35, lambda: 0.08,
     D0: 0.08, Dmax: 0.70, rdBase: 0.35, kappa: 0.20,
     Smax: 1.80, rho: 0.35, gamma: 0.70
   })
@@ -561,7 +560,7 @@ var PRESET_NOTES = {
 // ================================================================
 // Non-slider params that vary by preset (updated when preset loaded)
 var _extras = {
-  eta0: 1.0, lambda: 0.10, rdBase: 0.50, kappa: 0.12,
+  eta0: 1.0, lambda: 0.06, rdBase: 0.50, kappa: 0.12,
   preInvestFrac: 0.8, overhead: 0.5, switchMax: 0.50, osMaxQuality: 0.95
 };
 
@@ -575,7 +574,7 @@ function getParams() {
     // Advanced
     decelStart: +gv('decelStart'),
     capexDecel: gv('capexDecel') / 100, tau: +gv('tau'), etaGrowth: gv('etaGrowth') / 100,
-    TAMCeiling: +gv('TAMCeiling'), gCapBase: gv('gCapBase') / 100,
+    gCapBase: gv('gCapBase') / 100,
     switchCost0: gv('switchCost0') / 100, switchGrowth: gv('switchGrowth') / 100,
     gammaDrift: gv('gammaDrift') / 100,
     sigmaBase: gv('sigmaBase') / 100, rho: gv('rho') / 100, Smax: gv('Smax') / 100,
@@ -598,7 +597,7 @@ function gv(id) { return document.getElementById('s-' + id).value; }
 function setParams(p) {
   // Sync non-slider extras from preset
   _extras.eta0 = p.eta0 || 1.0;
-  _extras.lambda = p.lambda != null ? p.lambda : 0.10;
+  _extras.lambda = p.lambda != null ? p.lambda : 0.06;
   _extras.rdBase = p.rdBase != null ? p.rdBase : 0.50;
   _extras.kappa = p.kappa != null ? p.kappa : 0.12;
   _extras.preInvestFrac = p.preInvestFrac || 0.8;
@@ -615,7 +614,7 @@ function setParams(p) {
   sv('decelStart', p.decelStart != null ? p.decelStart : 2);
   sv('capexDecel', (p.capexDecel || 0.60) * 100);
   sv('tau', p.tau || 2); sv('etaGrowth', (p.etaGrowth || 0.10) * 100);
-  sv('TAMCeiling', p.TAMCeiling || 1600); sv('gCapBase', (p.gCapBase || 0.30) * 100);
+  sv('gCapBase', (p.gCapBase || 0.30) * 100);
   sv('switchCost0', (p.switchCost0 || 0.10) * 100);
   sv('switchGrowth', (p.switchGrowth || 0.015) * 100);
   sv('gammaDrift', (p.gammaDrift || 0) * 100);
@@ -650,7 +649,6 @@ function updateLabels() {
   dl('capexDecel', (gv('capexDecel') / 100).toFixed(2));
   dl('tau', gv('tau'));
   dl('etaGrowth', gv('etaGrowth') + '%');
-  dl('TAMCeiling', '$' + gv('TAMCeiling') + 'B');
   dl('gCapBase', gv('gCapBase') + '%');
   dl('switchCost0', (gv('switchCost0') / 100).toFixed(2));
   dl('switchGrowth', (gv('switchGrowth') / 100).toFixed(3));
@@ -875,7 +873,8 @@ function updateSensitivity() {
     ['osSub', 0.65, 0.20, 'OS Substitutability'],
     ['phi', 0.75, 0.25, '% Contestable by OS'],
     ['switchCost0', 0.02, 0.30, 'Switching Costs'],
-    ['TAMCeiling', 300, 1000, 'TAM Ceiling ($B)'],
+    ['gCapBase', 0.20, 0.40, 'TAM Growth Rate'],
+    ['lambda', 0.02, 0.10, 'Training → TAM Feedback'],
     ['sigmaBase', 2.50, 0.80, 'Overcapacity Sensitivity'],
     ['Smax', 1.05, 2.00, 'Max Scarcity Premium'],
     ['capexDecel', 0.70, 0.95, 'Growth Deceleration'],
