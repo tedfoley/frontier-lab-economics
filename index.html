@@ -151,38 +151,40 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
             <p class="me-note">A <strong>two-stage capacity investment game</strong> (Dixit &amp; Pindyck 1994; Grenadier 2002): firms commit irreversible compute spend years before demand is known, then compete on realized demand. All values are per-firm unless noted.</p>
 
             <h4>TAM &amp; Capability Growth</h4>
-            <div class="me-eq">g_cap = g_base + λ·log(ΣTraining(t) / Training₀)</div>
+            <div class="me-eq">g_cap = g_base + λ·((cumTraining_total / historical)^α − 1)</div>
             <div class="me-eq">TAM(t) = TAM(t−1) × (1 + g_cap)</div>
-            <p class="me-note">Cumulative training compute drives capability improvements that expand the addressable market. <strong>TAM Growth g_base</strong> = baseline annual growth; <strong>λ (Training→TAM)</strong> = scaling feedback strength. Higher both → faster market expansion.</p>
+            <p class="me-note">Cumulative training compute (including a <strong>historical base</strong> of ~$40B pre-2024 industry-wide) drives capability improvements via <strong>power-law scaling</strong> (Kaplan et al. 2020; α ≈ 0.07 = strongly diminishing returns). <strong>λ</strong> = scaling feedback strength. Unlike the log-ratio formulation, this depends on absolute cumulative compute — more training spend → higher g_cap.</p>
 
-            <h4>Demand — Bass S-Curve Diffusion</h4>
-            <div class="me-eq">D(t) = TAM(t) × D_max / (1 + ((D_max−D₀)/D₀)·e^(−r_d·t))</div>
-            <p class="me-note">Adoption follows an S-curve from <strong>Initial Adoption D₀</strong> toward <strong>Max Adoption D_max</strong>. Overcapacity (cheap prices) accelerates r_d via κ feedback. Higher D₀/D_max → more early/long-run demand.</p>
+            <h4>Demand — Bass S-Curve with Novelty Dilution</h4>
+            <div class="me-eq">noveltyFactor = 1 / (1 + ψ·max(TAM_growth_rate, 0))</div>
+            <div class="me-eq">r_d_eff = r_d · noveltyFactor</div>
+            <div class="me-eq">D(t) = TAM(t) × D_max / (1 + ((D_max−D₀)/D₀)·e^(−r_d_eff·t))</div>
+            <p class="me-note">Adoption follows a Bass S-curve from <strong>D₀</strong> toward <strong>D_max</strong>. <strong>Novelty dilution (ψ)</strong>: when TAM grows fast, much of the market is newly addressable and hasn't started adopting yet, so effective diffusion slows. Overcapacity accelerates r_d via <strong>κ</strong> feedback (cheap prices drive adoption).</p>
 
-            <h4>Open Source Pressure</h4>
+            <h4>Open Source &amp; Salvage Revenue</h4>
             <div class="me-eq">D_frontier = D × [(1−φ) + φ·(1 − q_os·σ_os)²]</div>
-            <p class="me-note">Fraction <strong>φ (% Contestable)</strong> of demand can be served by OS. Within it, frontier share shrinks by <strong>OS Quality q_os</strong> × <strong>OS Substitutability σ_os</strong>. The protected segment (1−φ) is immune. Higher φ, q_os, or σ_os → more demand lost to OS.</p>
+            <div class="me-eq">demandLostToOS = D − D_frontier</div>
+            <p class="me-note">Fraction <strong>φ</strong> of demand is contestable by open source. In <strong>overcapacity</strong>, firms don't let GPUs sit idle — excess capacity earns <strong>salvage revenue</strong> at a low margin (cheap API tiers, hosting open-weight models, fine-tuning services) from the demand pool OS captured.</p>
 
-            <h4>Capacity &amp; Investment</h4>
+            <h4>Capacity &amp; Hardware Depreciation</h4>
             <div class="me-eq">I(t): I₀ at t=0; then I(t) = I(t−1)·(1+g(t))</div>
             <div class="me-eq">g(t) = capexGrowth·capexDecel^max(0, t−decelStart)</div>
-            <div class="me-eq">K_i(t) = θ · I(t−τ) · η(t),  η(t) = η₀·(1+ηGrowth)^t</div>
-            <p class="me-note"><strong>Yr 1 Compute</strong> = I₀; <strong>Capex Growth</strong> = initial annual rate; <strong>Deceleration</strong> = how quickly growth slows after <strong>Full Growth Years</strong>. <strong>Inference Split θ</strong> = fraction of capex going to serving (remainder trains models). <strong>Lead Time τ</strong> = years before investment becomes serving capacity. <strong>Efficiency Growth</strong> = annual improvement in compute-per-dollar.</p>
+            <div class="me-eq">K_i(t) = θ · I(t−τ) · η(t) · (1−δ_hw)^age</div>
+            <p class="me-note"><strong>Hardware depreciation (δ_hw ≈ 15%/yr)</strong>: capacity depreciates net of algorithmic improvements. With τ=2 lead time, hardware has lost ~28% by arrival. <strong>Legacy capacity</strong>: when firms exit (entry/exit mode), their hardware enters a decay pool (30%/yr depreciation) rather than vanishing.</p>
           </div>
         </div>
         <div>
           <div class="me-section">
             <h4>Revenue &amp; Pricing</h4>
-            <div class="me-eq">u = K_total / D_frontier   (utilization ratio)</div>
+            <div class="me-eq">u = K_total / D_frontier   (supply/demand ratio; u &gt; 1 = overcapacity)</div>
             <div class="me-eq">σ_eff = σ_base·(0.5 + 0.5·γ_eff),  γ_eff = γ·(1−switchCost)</div>
-            <div class="me-eq">u ≥ 1 (overcapacity):  Rev_i = (D_frontier/N) · (1/u)^σ_eff</div>
-            <div class="me-eq">u &lt; 1 (scarcity):     Rev_i = (D_frontier/N) · min((1/u)^ρ, S_max)</div>
-            <div class="me-eq">  × [1 + (scarcityMult−1)·(1 − γ_eff·0.3·(N−1)/N)]</div>
-            <p class="me-note">When supply exceeds demand (u≥1), prices collapse at rate <strong>σ_base</strong> amplified by competition. Higher <strong>Substitutability γ</strong> → larger effective σ → worse overcapacity pain. <strong>Switching Costs</strong> reduce γ_eff → softer pricing. When scarce (u&lt;1), <strong>Scarcity Power ρ</strong> captures premium up to <strong>Max Scarcity S_max</strong>, but eroded by competition.</p>
+            <div class="me-eq">u ≥ 1 (overcapacity):  Rev = (D_f/N)·(1/u)^σ_eff + salvage</div>
+            <div class="me-eq">u &lt; 1 (scarcity):     Rev = (D_f/N) · min((1/u)^ρ, S_max)</div>
+            <p class="me-note">When supply exceeds demand (u≥1), prices collapse at rate <strong>σ_base</strong> amplified by competition, plus <strong>salvage revenue</strong> from excess capacity. When scarce (u&lt;1), <strong>Scarcity Power ρ</strong> captures premium up to <strong>S_max</strong>. Per Kreps &amp; Scheinkman (1983), capacity constraints eliminate undercutting incentives — competition does NOT erode scarcity rents.</p>
 
             <h4>Cost Structure</h4>
             <div class="me-eq">Cost_i(t) = I(t) + talentCost·(1+talentGrowth)^t + overhead</div>
-            <p class="me-note">Costs = capex + growing talent cost + fixed overhead ($0.5B). <strong>Talent Cost</strong> grows at <strong>Talent Growth</strong> rate annually.</p>
+            <p class="me-note">Costs = capex + growing talent cost + fixed overhead ($0.3B). <strong>Talent Cost</strong> grows at <strong>Talent Growth</strong> rate annually.</p>
 
             <h4>Parameter Effects on 10-Year NPV</h4>
             <table class="me-tbl">
@@ -196,16 +198,15 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
               <tr><td>Capex Growth</td><td>Lower (faster cost growth, overcapacity)</td></tr>
               <tr><td>Inference Split θ</td><td>Mixed (more serving capacity vs less training)</td></tr>
               <tr><td>Lead Time τ</td><td>Lower (more timing mismatch, overcapacity)</td></tr>
-              <tr><td>Efficiency Growth</td><td>Mixed (more capacity per $, can help or hurt)</td></tr>
+              <tr><td>Hardware Depreciation</td><td>Lower (old hardware less valuable)</td></tr>
+              <tr><td>Novelty Dilution ψ</td><td>Lower (new TAM adopts slower)</td></tr>
               <tr><td>OS Quality / Sub.</td><td>Lower (more demand captured by OS)</td></tr>
               <tr><td>% Contestable φ</td><td>Lower (more demand vulnerable to OS)</td></tr>
               <tr><td>Switching Costs</td><td>Higher (reduces γ_eff → better pricing)</td></tr>
-              <tr><td>TAM Growth Rate</td><td>Higher (faster market expansion)</td></tr>
               <tr><td>Overcapacity σ_base</td><td>Lower (revenue collapses harder)</td></tr>
               <tr><td>Scarcity Power ρ</td><td>Higher (better pricing when scarce)</td></tr>
-              <tr><td>Max Scarcity S_max</td><td>Higher (higher ceiling on scarcity premium)</td></tr>
-              <tr><td>Talent / Overhead</td><td>Lower (higher fixed costs)</td></tr>
-              <tr><td>Discount Rate</td><td>Lower (future profits worth less in NPV)</td></tr>
+              <tr><td>Salvage Margin</td><td>Higher (better floor in overcapacity)</td></tr>
+              <tr><td>Discount Rate</td><td>Lower (future profits worth less)</td></tr>
             </table>
           </div>
         </div>
@@ -217,11 +218,11 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="control-group">
         <h3>Market Demand</h3>
         <div class="slider-row"><label>TAM ($B)</label>
-          <input type="range" id="s-TAM0" min="20" max="300" step="5" value="130">
-          <span class="val" id="v-TAM0">$130B</span></div>
+          <input type="range" id="s-TAM0" min="10" max="200" step="5" value="50">
+          <span class="val" id="v-TAM0">$50B</span></div>
         <div class="slider-row"><label>Initial Adoption</label>
-          <input type="range" id="s-D0" min="3" max="25" step="1" value="15">
-          <span class="val" id="v-D0">10%</span></div>
+          <input type="range" id="s-D0" min="3" max="25" step="1" value="9">
+          <span class="val" id="v-D0">9%</span></div>
         <div class="slider-row"><label>Max Adoption</label>
           <input type="range" id="s-Dmax" min="30" max="80" step="5" value="55">
           <span class="val" id="v-Dmax">55%</span></div>
@@ -229,8 +230,8 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="control-group">
         <h3>Investment</h3>
         <div class="slider-row"><label>Yr 1 Compute ($B)</label>
-          <input type="range" id="s-initialCapex" min="0.5" max="15" step="0.5" value="5.0">
-          <span class="val" id="v-initialCapex">$5.0B</span></div>
+          <input type="range" id="s-initialCapex" min="0.5" max="10" step="0.5" value="1.5">
+          <span class="val" id="v-initialCapex">$1.5B</span></div>
         <div class="slider-row"><label>Capex Growth</label>
           <input type="range" id="s-capexGrowth" min="50" max="250" step="10" value="180">
           <span class="val" id="v-capexGrowth">180%</span></div>
@@ -309,8 +310,8 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
         <div class="control-group">
           <h3>Costs &amp; Other</h3>
           <div class="slider-row"><label>Talent Cost ($B)</label>
-            <input type="range" id="s-talentCost0" min="0.3" max="5" step="0.1" value="1.0">
-            <span class="val" id="v-talentCost0">$1.0B</span></div>
+            <input type="range" id="s-talentCost0" min="0.1" max="3" step="0.1" value="0.6">
+            <span class="val" id="v-talentCost0">$0.6B</span></div>
           <div class="slider-row"><label>Talent Growth</label>
             <input type="range" id="s-talentGrowth" min="5" max="40" step="1" value="15">
             <span class="val" id="v-talentGrowth">15%</span></div>
@@ -428,12 +429,15 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 //   realized; firms compete on capacity-constrained pricing.
 //
 // Key dynamics:
-//   - Overcapacity (u > 1): prices collapse as (1/u)^sigma
-//   - Scarcity (u < 1): pricing power as (1/u)^rho, capped at Smax
+//   - Overcapacity (u > 1): prices collapse as (1/u)^sigma + salvage revenue
+//   - Scarcity (u < 1): pricing power as (1/u)^rho, capped at Smax (Kreps & Scheinkman)
 //   - sigma modulated by gamma_eff (competition intensity)
 //   - Training/inference split: theta to serving, (1-theta) to training
-//   - Cumulative training expands TAM via scaling laws
-//   - Bass S-curve diffusion with overcapacity feedback
+//   - Cumulative training expands TAM via power-law scaling (Kaplan et al.)
+//   - Bass S-curve diffusion with novelty dilution and overcapacity feedback
+//   - Hardware depreciation (net of algorithmic gains)
+//   - OS salvage revenue: excess capacity repurposed at low margin
+//   - Legacy capacity: exited firms' hardware persists/depreciates
 //   - Capex growth decelerates over time
 // ================================================================
 
@@ -441,12 +445,27 @@ var START_YEAR = 2024;
 
 // Anthropic reference data (shown separately from model output)
 var HIST_YEARS = [2024, 2025];
-var HIST_REVENUE = [1.0, 4.5];
-var HIST_COSTS = [2.0, 6.0];
-var HIST_PROFIT = [-1.0, -1.5];
+var HIST_REVENUE = [1.0, 4.4];
+var HIST_COSTS = [2.4, 5.2];
+var HIST_PROFIT = [-1.4, -0.8];
 
 /**
  * Run 10-year capacity investment simulation.
+ *
+ * Implements a two-stage capacity investment game:
+ *   Stage 1: Firms commit irreversible capex with lead time tau.
+ *   Stage 2: Demand realized; firms compete on capacity-constrained pricing.
+ *
+ * Key model features:
+ *   - Hardware depreciation (Fix 7): capacity depreciates net of algorithmic gains
+ *   - Historical training base (Fix 4): TAM feedback uses absolute cumulative compute
+ *     with power-law scaling (Kaplan et al. 2020, Hoffmann et al. 2022)
+ *   - Novelty dilution (Fix 2): rapid TAM growth slows effective diffusion rate
+ *   - Salvage revenue (Fix 5): overcapacity firms earn low-margin revenue from
+ *     demand lost to open source (cheap API tiers, fine-tuning services)
+ *   - Legacy capacity (Fix 6): exited firms' hardware persists and depreciates
+ *   - Kreps & Scheinkman scarcity (Fix 3): no competition erosion in scarcity regime
+ *   - Supply/demand ratio (Fix 1): u = K_total / D_frontier (u > 1 = overcapacity)
  */
 function runSim(p) {
   var ny = p.nYears || 10;
@@ -457,12 +476,21 @@ function runSim(p) {
   var r = {
     year: [], revenue: [], totalCost: [], netProfit: [], cumProfit: [],
     npvCum: [], capex: [], talent: [], TAM: [], diffusion: [],
-    D: [], Dfrontier: [], K_i: [], K_total: [], utilization: [],
+    D: [], Dfrontier: [], K_i: [], K_total: [], capRatio: [],
     nFirms: [], gammaEff: [], osQ: [], switchCost: []
   };
 
   var cp = 0, cn = 0;
   var prevDfrontier = 0, prevTAM = p.TAM0;
+
+  // Fix 6: Legacy capacity pool — hardware from exited firms, depreciates over time
+  var legacyCapacity = 0;
+  var capacityDepreciation = p.capacityDepreciation || 0.30;
+
+  // Fix 4: Historical cumulative training — all industry training compute prior to simulation.
+  // Represents the base of capabilities already built (~$40B across all firms).
+  var historicalTraining = p.historicalTraining || 40;
+  var scalingAlpha = p.scalingAlpha || 0.07;
 
   for (var t = 0; t < ny; t++) {
     // === INVESTMENT with delayed deceleration ===
@@ -484,7 +512,9 @@ function runSim(p) {
     var totalCost = I_t + talent + (p.overhead || 0.5);
 
     // === CAPACITY (from past investment, delayed by tau) ===
-    // Before tau: use preInvestFrac * initialCapex as legacy capacity
+    // Fix 7: Hardware depreciation — capacity depreciates based on hardware age.
+    // Net depreciation captures gross hardware aging minus algorithmic improvements
+    // on old hardware. With deltaK_net=0.15 and tau=2, hardware loses ~28% by arrival.
     var I_past;
     if (t >= p.tau) {
       I_past = capexArr[t - p.tau];
@@ -492,30 +522,47 @@ function runSim(p) {
       I_past = p.initialCapex * (p.preInvestFrac || 0.8);
     }
     var eta = (p.eta0 || 1) * Math.pow(1 + p.etaGrowth, t);
-    var K_i = p.theta * I_past * eta;
-    var K_total = N * K_i;
+    var deltaK_net = p.hardwareDeprec || 0.15;
+    var hwAge = (t >= p.tau) ? p.tau : t;
+    var K_i = p.theta * I_past * eta * Math.pow(1 - deltaK_net, hwAge);
 
-    // === DEMAND: TAM driven by cumulative training (iterative) ===
+    // Fix 6: Total capacity includes legacy pool from exited firms
+    legacyCapacity *= (1 - capacityDepreciation);
+    var K_total = N * K_i + legacyCapacity;
+
+    // === DEMAND: TAM driven by cumulative training ===
+    // Fix 4: Use historical training base + power-law scaling (Kaplan et al. 2020).
+    // capability proportional to cumCompute^alpha with strongly diminishing returns.
+    // Depends on absolute scale: more training spend -> higher gCap.
     var cumTraining = 0;
     for (var s = 0; s <= t; s++) {
       cumTraining += N * (1 - p.theta) * capexArr[s];
     }
-    var cumTraining0 = N * (1 - p.theta) * p.initialCapex;
-    var logRatio = Math.log(Math.max(cumTraining / cumTraining0, 1));
-    var gCap = p.gCapBase + (p.lambda || 0.06) * logRatio;
+    var cumTrainingTotal = historicalTraining + cumTraining;
+    var gCap = p.gCapBase + (p.lambda || 0.06) * (Math.pow(cumTrainingTotal / historicalTraining, scalingAlpha) - 1);
+
+    // Track TAM before growth for novelty dilution calculation
+    var prevTAM_beforeGrowth = prevTAM;
     var TAM;
     if (t === 0) { TAM = p.TAM0; }
     else { TAM = prevTAM * (1 + gCap); }
     prevTAM = TAM;
 
     // === DEMAND: Bass diffusion S-curve ===
-    // Overcapacity accelerates adoption (price cuts drive adoption)
-    var rd = p.rdBase || 1.20;
+    // Fix 2: Novelty dilution — when TAM grows rapidly, much of the market is newly
+    // addressable and hasn't started the adoption S-curve yet. Effective diffusion
+    // slows proportionally to TAM growth rate.
+    var rd = p.rdBase || 0.55;
     if (t > 0 && prevDfrontier > 0 && K_total > prevDfrontier) {
       var overcapRatio = (K_total - prevDfrontier) / prevDfrontier;
       rd = rd + (p.kappa || 0.12) * Math.max(0, overcapRatio);
     }
-    var diffusion = p.Dmax / (1 + ((p.Dmax - p.D0) / p.D0) * Math.exp(-rd * t));
+    var psi = p.psi || 0.6;
+    var tamGrowthRate = (t === 0) ? gCap : (TAM - prevTAM_beforeGrowth) / prevTAM_beforeGrowth;
+    var noveltyFactor = 1 / (1 + psi * Math.max(tamGrowthRate, 0));
+    var rd_effective = rd * noveltyFactor;
+
+    var diffusion = p.Dmax / (1 + ((p.Dmax - p.D0) / p.D0) * Math.exp(-rd_effective * t));
     var D = TAM * diffusion;
 
     // === OPEN SOURCE: segmented market ===
@@ -538,11 +585,23 @@ function runSim(p) {
     if (u >= 1) {
       // Overcapacity: price collapses
       revenue = (Dfrontier / N) * Math.pow(1 / u, sigma);
+
+      // Fix 5: Salvage revenue — excess capacity repurposed for lower-tier services
+      // (cheap API tiers, hosting open-weight models, fine-tuning, etc.)
+      // Firms don't let GPUs sit idle; they find lower-value uses.
+      var excessCapacity_i = K_i - (Dfrontier / N);
+      if (excessCapacity_i > 0) {
+        var demandLostToOS = D - Dfrontier;
+        var salvagePool_i = demandLostToOS / N;
+        var salvageCapture = Math.min(excessCapacity_i, salvagePool_i);
+        revenue += salvageCapture * (p.salvageMargin || 0.20);
+      }
     } else {
-      // Scarcity: pricing power, but competition erodes rents
+      // Scarcity: all firms at capacity, Kreps & Scheinkman (1983) logic applies.
+      // Capacity constraints eliminate price competition incentive — no firm can
+      // undercut to steal share when already selling everything it can produce.
+      // rho and Smax control how much scarcity translates to pricing power.
       var scarcityMult = Math.min(Math.pow(1 / u, p.rho), p.Smax);
-      var competitionErosion = 1 - gammaEff * 0.3 * (N - 1) / N;
-      scarcityMult = 1 + (scarcityMult - 1) * Math.max(competitionErosion, 0.1);
       revenue = (Dfrontier / N) * scarcityMult;
     }
 
@@ -558,6 +617,9 @@ function runSim(p) {
       for (var i = 0; i < recent.length; i++) cumR += recent[i];
 
       if (cumR < -(p.exitThreshold || 12)) {
+        // Fix 6: Exiting firm's capacity doesn't vanish — gets sold/repurposed.
+        // Added to legacy pool that depreciates as hardware ages out.
+        legacyCapacity += K_i;
         N = Math.max(1, N - 1);
       } else {
         var allPos = true;
@@ -587,7 +649,7 @@ function runSim(p) {
     r.Dfrontier.push(Dfrontier);
     r.K_i.push(K_i);
     r.K_total.push(K_total);
-    r.utilization.push(u);
+    r.capRatio.push(u);
     r.nFirms.push(N);
     r.gammaEff.push(gammaEff);
     r.osQ.push(osQ);
@@ -603,19 +665,21 @@ function runSim(p) {
 // PRESETS
 // ================================================================
 var BASE = {
-  initialCapex: 5.0, capexGrowth: 1.80, capexDecel: 0.60, decelStart: 2,
+  initialCapex: 1.5, capexGrowth: 1.80, capexDecel: 0.60, decelStart: 2,
   theta: 0.55, eta0: 1.0, etaGrowth: 0.10, tau: 2, preInvestFrac: 0.8,
-  TAM0: 130, gCapBase: 0.30, lambda: 0.06,
-  D0: 0.15, Dmax: 0.55, rdBase: 1.20, kappa: 0.12,
+  TAM0: 50, gCapBase: 0.25, lambda: 0.06,
+  D0: 0.09, Dmax: 0.55, rdBase: 1.80, kappa: 0.12,
   nFrontier: 4, gamma: 0.75, gammaDrift: 0,
   switchCost0: 0.10, switchGrowth: 0.015, switchMax: 0.50,
   osQuality0: 0.50, osCatchUp: 0.03, osMaxQuality: 0.95, osSub: 0.40,
   phi: 0.50,
-  talentCost0: 1.0, talentGrowth: 0.15, overhead: 0.5,
+  talentCost0: 0.6, talentGrowth: 0.15, overhead: 0.3,
   sigmaBase: 1.50, rho: 0.25, Smax: 1.30,
   enableEntryExit: false, exitThreshold: 12, entryThreshold: 20,
   lookbackYears: 3, maxFirms: 7,
-  nYears: 10, discountRate: 0.10
+  nYears: 10, discountRate: 0.10,
+  psi: 0.6, historicalTraining: 40, scalingAlpha: 0.07,
+  salvageMargin: 0.20, hardwareDeprec: 0.15, capacityDepreciation: 0.30
 };
 
 var PRESETS = {
@@ -623,19 +687,19 @@ var PRESETS = {
   bear: Object.assign({}, BASE, {
     gamma: 0.92, nFrontier: 5, switchCost0: 0.03, switchGrowth: 0.005,
     osQuality0: 0.65, osCatchUp: 0.04, osSub: 0.55, phi: 0.65,
-    D0: 0.12, Dmax: 0.60, rdBase: 0.80, gCapBase: 0.20, lambda: 0.03,
-    capexGrowth: 0.80,
+    D0: 0.06, Dmax: 0.45, rdBase: 1.20, gCapBase: 0.20, lambda: 0.03,
+    capexGrowth: 1.50, initialCapex: 2.0,
     Smax: 1.10, sigmaBase: 1.70
   }),
   bull: Object.assign({}, BASE, {
     gamma: 0.55, nFrontier: 3, switchCost0: 0.20, switchGrowth: 0.025,
     osQuality0: 0.40, osCatchUp: 0.02, osSub: 0.30, phi: 0.35,
-    Dmax: 0.65, D0: 0.12, gCapBase: 0.35, lambda: 0.07,
+    D0: 0.10, Dmax: 0.65, rdBase: 2.50, gCapBase: 0.30, lambda: 0.07,
     Smax: 1.50, rho: 0.35, sigmaBase: 1.20
   }),
   agi: Object.assign({}, BASE, {
-    TAM0: 250, gCapBase: 0.35, lambda: 0.08,
-    D0: 0.08, Dmax: 0.70, rdBase: 0.35, kappa: 0.20,
+    TAM0: 150, gCapBase: 0.35, lambda: 0.08,
+    D0: 0.05, Dmax: 0.70, rdBase: 1.50, kappa: 0.20,
     Smax: 1.80, rho: 0.35, gamma: 0.70
   })
 };
@@ -643,10 +707,10 @@ var PRESETS = {
 var PRESET_LABELS = { bear: 'Bear Case', base: 'Base Case', bull: 'Bull Case', agi: 'AGI Shock' };
 var PRESET_COLORS = { bear: '#dc2626', base: '#2563eb', bull: '#16a34a', agi: '#7c3aed' };
 var PRESET_NOTES = {
-  bear: 'Near-perfect substitutes, 5 competitors, fast OS catch-up, strong overcapacity pricing. Bear thesis: margin destruction, not market absence — revenue is real but profitability takes ~8 years.',
-  base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. Calibrated to ~$2-3B rev 2024 (OpenAI-scale representative firm).',
-  bull: 'Meaningful differentiation, 3 firms, strong switching costs, large addressable market, fast TAM growth',
-  agi: 'Transformative capability breakthrough: massive TAM ($250B+), explosive growth, demand outpaces even aggressive investment'
+  bear: 'Near-perfect substitutes, 5 aggressive investors, fast OS catch-up. Bear thesis: commodity overcapacity — firms invest heavily but can\'t capture value. Worst NPV of all scenarios.',
+  base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. Calibrated to ~$1B rev / ~$2B cost per firm in 2024.',
+  bull: 'Meaningful differentiation, 3 firms, strong switching costs, fast adoption. Moats enable scarcity pricing; breaks even by 2025.',
+  agi: 'Transformative capability breakthrough: massive TAM ($150B+), explosive growth, demand outpaces even aggressive investment'
 };
 
 // ================================================================
@@ -654,8 +718,10 @@ var PRESET_NOTES = {
 // ================================================================
 // Non-slider params that vary by preset (updated when preset loaded)
 var _extras = {
-  eta0: 1.0, lambda: 0.06, rdBase: 1.20, kappa: 0.12,
-  preInvestFrac: 0.8, overhead: 0.5, switchMax: 0.50, osMaxQuality: 0.95
+  eta0: 1.0, lambda: 0.06, rdBase: 0.55, kappa: 0.12,
+  preInvestFrac: 0.8, overhead: 0.5, switchMax: 0.50, osMaxQuality: 0.95,
+  psi: 0.6, historicalTraining: 40, scalingAlpha: 0.07,
+  salvageMargin: 0.20, hardwareDeprec: 0.15, capacityDepreciation: 0.30
 };
 
 function getParams() {
@@ -682,6 +748,9 @@ function getParams() {
     kappa: _extras.kappa, preInvestFrac: _extras.preInvestFrac,
     overhead: _extras.overhead, switchMax: _extras.switchMax,
     osMaxQuality: _extras.osMaxQuality,
+    psi: _extras.psi, historicalTraining: _extras.historicalTraining,
+    scalingAlpha: _extras.scalingAlpha, salvageMargin: _extras.salvageMargin,
+    hardwareDeprec: _extras.hardwareDeprec, capacityDepreciation: _extras.capacityDepreciation,
     nYears: 10
   };
 }
@@ -692,14 +761,20 @@ function setParams(p) {
   // Sync non-slider extras from preset
   _extras.eta0 = p.eta0 || 1.0;
   _extras.lambda = p.lambda != null ? p.lambda : 0.06;
-  _extras.rdBase = p.rdBase != null ? p.rdBase : 1.20;
+  _extras.rdBase = p.rdBase != null ? p.rdBase : 0.55;
   _extras.kappa = p.kappa != null ? p.kappa : 0.12;
   _extras.preInvestFrac = p.preInvestFrac || 0.8;
   _extras.overhead = p.overhead != null ? p.overhead : 0.5;
   _extras.switchMax = p.switchMax || 0.50;
   _extras.osMaxQuality = p.osMaxQuality || 0.95;
+  _extras.psi = p.psi != null ? p.psi : 0.6;
+  _extras.historicalTraining = p.historicalTraining || 40;
+  _extras.scalingAlpha = p.scalingAlpha != null ? p.scalingAlpha : 0.07;
+  _extras.salvageMargin = p.salvageMargin != null ? p.salvageMargin : 0.20;
+  _extras.hardwareDeprec = p.hardwareDeprec != null ? p.hardwareDeprec : 0.15;
+  _extras.capacityDepreciation = p.capacityDepreciation != null ? p.capacityDepreciation : 0.30;
 
-  sv('TAM0', p.TAM0); sv('D0', (p.D0 || 0.15) * 100); sv('Dmax', (p.Dmax || 0.55) * 100);
+  sv('TAM0', p.TAM0); sv('D0', (p.D0 || 0.09) * 100); sv('Dmax', (p.Dmax || 0.55) * 100);
   sv('initialCapex', p.initialCapex); sv('capexGrowth', p.capexGrowth * 100);
   sv('theta', (p.theta || 0.55) * 100);
   sv('nFrontier', p.nFrontier); sv('gamma', p.gamma * 100);
@@ -824,7 +899,7 @@ function updateSimCharts() {
   // Create shapes for overcapacity/scarcity shading
   var capDemShapes = [];
   for (var i = 0; i < ny - 1; i++) {
-    var isOvercap = res.utilization[i] >= 1;
+    var isOvercap = res.capRatio[i] >= 1;
     capDemShapes.push({
       type: 'rect', xref: 'x', yref: 'paper',
       x0: res.year[i] - 0.5, x1: res.year[i] + 0.5,
@@ -839,13 +914,13 @@ function updateSimCharts() {
       line: { color: PRESET_COLORS.bear, width: 2.5 }, fill: 'none' },
     { x: res.year, y: perFirmDemand, name: 'Demand (per firm)',
       line: { color: PRESET_COLORS.bull, width: 2.5 }, fill: 'none' },
-    { x: res.year, y: res.utilization, name: 'Utilization (u)', yaxis: 'y2',
+    { x: res.year, y: res.capRatio, name: 'S/D Ratio (u)', yaxis: 'y2',
       line: { color: '#f59e0b', width: 2, dash: 'dot' }, opacity: 0.8 }
   ], Object.assign({}, plotLayout, {
-    title: 'Capacity vs. Demand & Utilization',
+    title: 'Capacity vs. Demand & Supply/Demand Ratio',
     yaxis: Object.assign({}, plotLayout.yaxis, { title: '$B per firm' }),
-    yaxis2: { title: 'Utilization', overlaying: 'y', side: 'right',
-      gridcolor: 'rgba(0,0,0,0)', showgrid: false, range: [0, Math.max(6, Math.max.apply(null, res.utilization) * 1.1)] },
+    yaxis2: { title: 'S/D Ratio', overlaying: 'y', side: 'right',
+      gridcolor: 'rgba(0,0,0,0)', showgrid: false, range: [0, Math.max(6, Math.max.apply(null, res.capRatio) * 1.1)] },
     shapes: capDemShapes.concat([
       { type: 'line', xref: 'paper', yref: 'y2', x0: 0, x1: 1, y0: 1, y1: 1,
         line: { color: '#f59e0b', width: 1.5, dash: 'dash' } }
@@ -900,7 +975,7 @@ function updateScenarios() {
     tracesNpv.push({ x: res.year, y: res.npvCum, name: PRESET_LABELS[k],
       line: { color: PRESET_COLORS[k], width: 2.5 }, mode: 'lines+markers', marker: { size: 4 } });
 
-    tracesUtil.push({ x: res.year, y: res.utilization, name: PRESET_LABELS[k],
+    tracesUtil.push({ x: res.year, y: res.capRatio, name: PRESET_LABELS[k],
       line: { color: PRESET_COLORS[k], width: 2.5 }, mode: 'lines+markers', marker: { size: 4 } });
 
     // Capacity gap = K_total - Dfrontier (positive = overcapacity)
@@ -934,8 +1009,8 @@ function updateScenarios() {
     shapes: [zeroLine] }), plotCfg);
 
   Plotly.react('chart-sc-util', tracesUtil, Object.assign({}, plotLayout, {
-    title: 'Utilization (u) — Above 1 = Overcapacity',
-    yaxis: Object.assign({}, plotLayout.yaxis, { title: 'Utilization Ratio' }),
+    title: 'Supply/Demand Ratio (u) — Above 1 = Overcapacity',
+    yaxis: Object.assign({}, plotLayout.yaxis, { title: 'S/D Ratio' }),
     shapes: [oneLine],
     annotations: [{ x: START_YEAR + 0.5, y: 1, text: 'Overcapacity above this line',
       showarrow: false, font: { size: 10, color: '#f59e0b' }, yshift: 12 }]
@@ -955,13 +1030,13 @@ function updateScenarios() {
 function updateSensitivity() {
   // Tornado chart
   var sensParams = [
-    ['TAM0', 60, 250, 'Total Addressable Market'],
-    ['D0', 0.05, 0.20, 'Initial Adoption Rate'],
+    ['TAM0', 25, 120, 'Total Addressable Market'],
+    ['D0', 0.04, 0.18, 'Initial Adoption Rate'],
     ['Dmax', 0.35, 0.75, 'Max Adoption'],
     ['nFrontier', 6, 2, '# Frontier Labs'],
     ['gamma', 0.95, 0.45, 'Substitutability (gamma)'],
     ['capexGrowth', 2.50, 0.80, 'Capex Growth Rate'],
-    ['initialCapex', 6.0, 1.0, 'Yr 1 Compute ($B)'],
+    ['initialCapex', 3.0, 0.5, 'Yr 1 Compute ($B)'],
     ['theta', 0.35, 0.75, 'Inference Split (theta)'],
     ['osQuality0', 0.75, 0.25, 'OS Quality'],
     ['osSub', 0.65, 0.20, 'OS Substitutability'],
@@ -972,7 +1047,7 @@ function updateSensitivity() {
     ['sigmaBase', 2.50, 0.80, 'Overcapacity Sensitivity'],
     ['Smax', 1.05, 2.00, 'Max Scarcity Premium'],
     ['capexDecel', 0.90, 0.35, 'Growth Deceleration'],
-    ['talentCost0', 2.0, 0.3, 'Talent Cost ($B)'],
+    ['talentCost0', 1.5, 0.2, 'Talent Cost ($B)'],
     ['rho', 0.10, 0.50, 'Scarcity Power (rho)']
   ];
   var baseNpv = runSim(BASE).npvCum[9];
@@ -1003,7 +1078,7 @@ function updateSensitivity() {
   // Break-even heatmap: TAM0 vs gamma
   var tRows = 25, gRows = 25;
   var tRange = [], gRange = [], zData = [];
-  for (var ti = 0; ti < tRows; ti++) { tRange.push(50 + ti * 300 / (tRows - 1)); }
+  for (var ti = 0; ti < tRows; ti++) { tRange.push(15 + ti * 150 / (tRows - 1)); }
   for (var gi = 0; gi < gRows; gi++) { gRange.push(0.30 + gi * 0.65 / (gRows - 1)); }
   for (var gi = 0; gi < gRows; gi++) {
     var row = [];
