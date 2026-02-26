@@ -103,6 +103,25 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 
 /* Footer */
 .footer{text-align:center;padding:2rem;color:var(--muted);font-size:.82rem;border-top:1px solid var(--border);margin-top:2rem}
+
+/* Model explanation */
+.me-wrap{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.me-wrap summary{cursor:pointer;font-weight:600;font-size:.9rem;padding:.75rem 1rem;color:var(--primary);list-style:none;display:flex;align-items:center;gap:.5rem;user-select:none}
+.me-wrap summary::-webkit-details-marker{display:none}
+.me-wrap summary::before{content:"▶";font-size:.7rem;transition:transform .2s;flex-shrink:0}
+.me-wrap[open] summary::before{transform:rotate(90deg)}
+.me-body{padding:.25rem 1.25rem 1.25rem}
+.me-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:.5rem}
+@media(max-width:800px){.me-grid{grid-template-columns:1fr}}
+.me-section h4{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:.9rem 0 .35rem;padding-bottom:.2rem;border-bottom:1px solid var(--border)}
+.me-section h4:first-child{margin-top:0}
+.me-eq{font-family:'Courier New',monospace;font-size:.79rem;background:#f1f5f9;padding:.35rem .7rem;border-radius:4px;margin:.22rem 0;border-left:3px solid var(--primary);color:#1e293b;word-break:break-word}
+.me-note{font-size:.78rem;color:var(--muted);margin:.2rem 0 .55rem;line-height:1.5}
+.me-tbl{width:100%;border-collapse:collapse;font-size:.77rem;margin-top:.35rem}
+.me-tbl th{text-align:left;padding:.28rem .5rem;background:#f1f5f9;font-size:.71rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--border)}
+.me-tbl td{padding:.26rem .5rem;border-top:1px solid #f1f5f9;vertical-align:top;line-height:1.4}
+.me-tbl tr:hover td{background:#fafafa}
+.me-tbl td:first-child{font-weight:600;width:40%;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -122,6 +141,77 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
 <!-- TAB 1: SIMULATOR -->
 <div class="container">
 <div id="tab-simulator" class="tab-content active">
+  <details class="me-wrap">
+    <summary>Model Explanation — Formulas &amp; Parameter Guide</summary>
+    <div class="me-body">
+      <div class="me-grid">
+        <div>
+          <div class="me-section">
+            <h4>Architecture</h4>
+            <p class="me-note">A <strong>two-stage capacity investment game</strong> (Dixit &amp; Pindyck 1994; Grenadier 2002): firms commit irreversible compute spend years before demand is known, then compete on realized demand. All values are per-firm unless noted.</p>
+
+            <h4>TAM &amp; Capability Growth</h4>
+            <div class="me-eq">g_cap = g_base + λ·log(ΣTraining(t) / Training₀)</div>
+            <div class="me-eq">TAM(t) = TAM(t−1) × (1 + g_cap)</div>
+            <p class="me-note">Cumulative training compute drives capability improvements that expand the addressable market. <strong>TAM Growth g_base</strong> = baseline annual growth; <strong>λ (Training→TAM)</strong> = scaling feedback strength. Higher both → faster market expansion.</p>
+
+            <h4>Demand — Bass S-Curve Diffusion</h4>
+            <div class="me-eq">D(t) = TAM(t) × D_max / (1 + ((D_max−D₀)/D₀)·e^(−r_d·t))</div>
+            <p class="me-note">Adoption follows an S-curve from <strong>Initial Adoption D₀</strong> toward <strong>Max Adoption D_max</strong>. Overcapacity (cheap prices) accelerates r_d via κ feedback. Higher D₀/D_max → more early/long-run demand.</p>
+
+            <h4>Open Source Pressure</h4>
+            <div class="me-eq">D_frontier = D × [(1−φ) + φ·(1 − q_os·σ_os)²]</div>
+            <p class="me-note">Fraction <strong>φ (% Contestable)</strong> of demand can be served by OS. Within it, frontier share shrinks by <strong>OS Quality q_os</strong> × <strong>OS Substitutability σ_os</strong>. The protected segment (1−φ) is immune. Higher φ, q_os, or σ_os → more demand lost to OS.</p>
+
+            <h4>Capacity &amp; Investment</h4>
+            <div class="me-eq">I(t): I₀ at t=0; then I(t) = I(t−1)·(1+g(t))</div>
+            <div class="me-eq">g(t) = capexGrowth·capexDecel^max(0, t−decelStart)</div>
+            <div class="me-eq">K_i(t) = θ · I(t−τ) · η(t),  η(t) = η₀·(1+ηGrowth)^t</div>
+            <p class="me-note"><strong>Yr 1 Compute</strong> = I₀; <strong>Capex Growth</strong> = initial annual rate; <strong>Deceleration</strong> = how quickly growth slows after <strong>Full Growth Years</strong>. <strong>Inference Split θ</strong> = fraction of capex going to serving (remainder trains models). <strong>Lead Time τ</strong> = years before investment becomes serving capacity. <strong>Efficiency Growth</strong> = annual improvement in compute-per-dollar.</p>
+          </div>
+        </div>
+        <div>
+          <div class="me-section">
+            <h4>Revenue &amp; Pricing</h4>
+            <div class="me-eq">u = K_total / D_frontier   (utilization ratio)</div>
+            <div class="me-eq">σ_eff = σ_base·(0.5 + 0.5·γ_eff),  γ_eff = γ·(1−switchCost)</div>
+            <div class="me-eq">u ≥ 1 (overcapacity):  Rev_i = (D_frontier/N) · (1/u)^σ_eff</div>
+            <div class="me-eq">u &lt; 1 (scarcity):     Rev_i = (D_frontier/N) · min((1/u)^ρ, S_max)</div>
+            <div class="me-eq">  × [1 + (scarcityMult−1)·(1 − γ_eff·0.3·(N−1)/N)]</div>
+            <p class="me-note">When supply exceeds demand (u≥1), prices collapse at rate <strong>σ_base</strong> amplified by competition. Higher <strong>Substitutability γ</strong> → larger effective σ → worse overcapacity pain. <strong>Switching Costs</strong> reduce γ_eff → softer pricing. When scarce (u&lt;1), <strong>Scarcity Power ρ</strong> captures premium up to <strong>Max Scarcity S_max</strong>, but eroded by competition.</p>
+
+            <h4>Cost Structure</h4>
+            <div class="me-eq">Cost_i(t) = I(t) + talentCost·(1+talentGrowth)^t + overhead</div>
+            <p class="me-note">Costs = capex + growing talent cost + fixed overhead ($0.5B). <strong>Talent Cost</strong> grows at <strong>Talent Growth</strong> rate annually.</p>
+
+            <h4>Parameter Effects on 10-Year NPV</h4>
+            <table class="me-tbl">
+              <tr><th>Parameter</th><th>Higher → profit is…</th></tr>
+              <tr><td>TAM ($B)</td><td>Higher (more demand)</td></tr>
+              <tr><td>Initial Adoption D₀</td><td>Higher (more early demand)</td></tr>
+              <tr><td>Max Adoption D_max</td><td>Higher (larger long-run market)</td></tr>
+              <tr><td># Labs N</td><td>Lower (split revenue, more overcap)</td></tr>
+              <tr><td>Substitutability γ</td><td>Lower (pricing power collapses faster)</td></tr>
+              <tr><td>Yr 1 Compute</td><td>Mixed (more capacity but higher cost)</td></tr>
+              <tr><td>Capex Growth</td><td>Lower (faster cost growth, overcapacity)</td></tr>
+              <tr><td>Inference Split θ</td><td>Mixed (more serving capacity vs less training)</td></tr>
+              <tr><td>Lead Time τ</td><td>Lower (more timing mismatch, overcapacity)</td></tr>
+              <tr><td>Efficiency Growth</td><td>Mixed (more capacity per $, can help or hurt)</td></tr>
+              <tr><td>OS Quality / Sub.</td><td>Lower (more demand captured by OS)</td></tr>
+              <tr><td>% Contestable φ</td><td>Lower (more demand vulnerable to OS)</td></tr>
+              <tr><td>Switching Costs</td><td>Higher (reduces γ_eff → better pricing)</td></tr>
+              <tr><td>TAM Growth Rate</td><td>Higher (faster market expansion)</td></tr>
+              <tr><td>Overcapacity σ_base</td><td>Lower (revenue collapses harder)</td></tr>
+              <tr><td>Scarcity Power ρ</td><td>Higher (better pricing when scarce)</td></tr>
+              <tr><td>Max Scarcity S_max</td><td>Higher (higher ceiling on scarcity premium)</td></tr>
+              <tr><td>Talent / Overhead</td><td>Lower (higher fixed costs)</td></tr>
+              <tr><td>Discount Rate</td><td>Lower (future profits worth less in NPV)</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
   <div class="sim-grid">
     <aside class="controls">
       <div class="control-group">
@@ -310,6 +400,9 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
   <div class="section-header">
     <h2>What Drives Profitability?</h2>
     <p>Tornado chart: each bar shows how much 10-year NPV changes when a single parameter swings from pessimistic to optimistic, holding everything else at the base case.</p>
+    <p style="margin-top:.5rem;color:var(--muted);font-size:.82rem">Charts use Base Case parameters and are computed once on first load.
+      <button onclick="recalcSensitivity()" style="margin-left:.6rem;padding:.25rem .7rem;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--primary);font-size:.8rem;cursor:pointer">&#8635; Recalculate</button>
+    </p>
   </div>
   <div class="chart-box"><div id="chart-tornado" style="height:560px"></div></div>
   <div class="section-header" style="margin-top:2rem">
@@ -530,8 +623,8 @@ var PRESETS = {
   bear: Object.assign({}, BASE, {
     gamma: 0.92, nFrontier: 5, switchCost0: 0.03, switchGrowth: 0.005,
     osQuality0: 0.65, osCatchUp: 0.04, osSub: 0.55, phi: 0.65,
-    Dmax: 0.45, gCapBase: 0.20, lambda: 0.03,
-    Smax: 1.10, sigmaBase: 2.00
+    D0: 0.12, Dmax: 0.45, gCapBase: 0.20, lambda: 0.03,
+    Smax: 1.10, sigmaBase: 1.70
   }),
   bull: Object.assign({}, BASE, {
     gamma: 0.55, nFrontier: 3, switchCost0: 0.20, switchGrowth: 0.025,
@@ -549,7 +642,7 @@ var PRESETS = {
 var PRESET_LABELS = { bear: 'Bear Case', base: 'Base Case', bull: 'Bull Case', agi: 'AGI Shock' };
 var PRESET_COLORS = { bear: '#dc2626', base: '#2563eb', bull: '#16a34a', agi: '#7c3aed' };
 var PRESET_NOTES = {
-  bear: 'Near-perfect substitutes, 5 competitors, fast OS catch-up, severe overcapacity pricing, small addressable market',
+  bear: 'Near-perfect substitutes, 5 competitors, fast OS catch-up, strong overcapacity pricing, slower TAM growth',
   base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. Calibrated to ~$1B rev 2024.',
   bull: 'Meaningful differentiation, 3 firms, strong switching costs, large addressable market, fast TAM growth',
   agi: 'Transformative capability breakthrough: massive TAM ($80B+), explosive growth, demand outpaces even aggressive investment'
@@ -866,8 +959,8 @@ function updateSensitivity() {
     ['Dmax', 0.35, 0.75, 'Max Adoption'],
     ['nFrontier', 6, 2, '# Frontier Labs'],
     ['gamma', 0.95, 0.45, 'Substitutability (gamma)'],
-    ['capexGrowth', 1.30, 0.60, 'Capex Growth Rate'],
-    ['initialCapex', 2.5, 0.5, 'Yr 1 Compute ($B)'],
+    ['capexGrowth', 2.50, 0.80, 'Capex Growth Rate'],
+    ['initialCapex', 6.0, 1.0, 'Yr 1 Compute ($B)'],
     ['theta', 0.35, 0.75, 'Inference Split (theta)'],
     ['osQuality0', 0.75, 0.25, 'OS Quality'],
     ['osSub', 0.65, 0.20, 'OS Substitutability'],
@@ -877,7 +970,7 @@ function updateSensitivity() {
     ['lambda', 0.02, 0.10, 'Training → TAM Feedback'],
     ['sigmaBase', 2.50, 0.80, 'Overcapacity Sensitivity'],
     ['Smax', 1.05, 2.00, 'Max Scarcity Premium'],
-    ['capexDecel', 0.70, 0.95, 'Growth Deceleration'],
+    ['capexDecel', 0.90, 0.35, 'Growth Deceleration'],
     ['talentCost0', 2.0, 0.3, 'Talent Cost ($B)'],
     ['rho', 0.10, 0.50, 'Scarcity Power (rho)']
   ];
@@ -907,7 +1000,7 @@ function updateSensitivity() {
   }), plotCfg);
 
   // Break-even heatmap: TAM0 vs gamma
-  var tRows = 40, gRows = 40;
+  var tRows = 25, gRows = 25;
   var tRange = [], gRange = [], zData = [];
   for (var ti = 0; ti < tRows; ti++) { tRange.push(15 + ti * 135 / (tRows - 1)); }
   for (var gi = 0; gi < gRows; gi++) { gRange.push(0.30 + gi * 0.65 / (gRows - 1)); }
@@ -969,6 +1062,8 @@ function loadPreset(name) {
 }
 
 // Tab switching
+var _sensComputed = false;
+function recalcSensitivity() { _sensComputed = false; updateSensitivity(); _sensComputed = true; }
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -976,7 +1071,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
     btn.classList.add('active');
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     if (btn.dataset.tab === 'scenarios') updateScenarios();
-    if (btn.dataset.tab === 'sensitivity') updateSensitivity();
+    if (btn.dataset.tab === 'sensitivity' && !_sensComputed) { updateSensitivity(); _sensComputed = true; }
   });
 });
 
