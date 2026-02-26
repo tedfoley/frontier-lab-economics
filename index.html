@@ -220,7 +220,7 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
           <input type="range" id="s-TAM0" min="20" max="300" step="5" value="130">
           <span class="val" id="v-TAM0">$130B</span></div>
         <div class="slider-row"><label>Initial Adoption</label>
-          <input type="range" id="s-D0" min="3" max="25" step="1" value="10">
+          <input type="range" id="s-D0" min="3" max="25" step="1" value="15">
           <span class="val" id="v-D0">10%</span></div>
         <div class="slider-row"><label>Max Adoption</label>
           <input type="range" id="s-Dmax" min="30" max="80" step="5" value="55">
@@ -510,7 +510,7 @@ function runSim(p) {
 
     // === DEMAND: Bass diffusion S-curve ===
     // Overcapacity accelerates adoption (price cuts drive adoption)
-    var rd = p.rdBase || 0.50;
+    var rd = p.rdBase || 1.20;
     if (t > 0 && prevDfrontier > 0 && K_total > prevDfrontier) {
       var overcapRatio = (K_total - prevDfrontier) / prevDfrontier;
       rd = rd + (p.kappa || 0.12) * Math.max(0, overcapRatio);
@@ -606,7 +606,7 @@ var BASE = {
   initialCapex: 5.0, capexGrowth: 1.80, capexDecel: 0.60, decelStart: 2,
   theta: 0.55, eta0: 1.0, etaGrowth: 0.10, tau: 2, preInvestFrac: 0.8,
   TAM0: 130, gCapBase: 0.30, lambda: 0.06,
-  D0: 0.10, Dmax: 0.55, rdBase: 0.50, kappa: 0.12,
+  D0: 0.15, Dmax: 0.55, rdBase: 1.20, kappa: 0.12,
   nFrontier: 4, gamma: 0.75, gammaDrift: 0,
   switchCost0: 0.10, switchGrowth: 0.015, switchMax: 0.50,
   osQuality0: 0.50, osCatchUp: 0.03, osMaxQuality: 0.95, osSub: 0.40,
@@ -623,7 +623,7 @@ var PRESETS = {
   bear: Object.assign({}, BASE, {
     gamma: 0.92, nFrontier: 5, switchCost0: 0.03, switchGrowth: 0.005,
     osQuality0: 0.65, osCatchUp: 0.04, osSub: 0.55, phi: 0.65,
-    D0: 0.12, Dmax: 0.60, gCapBase: 0.20, lambda: 0.03,
+    D0: 0.12, Dmax: 0.60, rdBase: 0.80, gCapBase: 0.20, lambda: 0.03,
     capexGrowth: 0.80,
     Smax: 1.10, sigmaBase: 1.70
   }),
@@ -654,7 +654,7 @@ var PRESET_NOTES = {
 // ================================================================
 // Non-slider params that vary by preset (updated when preset loaded)
 var _extras = {
-  eta0: 1.0, lambda: 0.06, rdBase: 0.50, kappa: 0.12,
+  eta0: 1.0, lambda: 0.06, rdBase: 1.20, kappa: 0.12,
   preInvestFrac: 0.8, overhead: 0.5, switchMax: 0.50, osMaxQuality: 0.95
 };
 
@@ -692,14 +692,14 @@ function setParams(p) {
   // Sync non-slider extras from preset
   _extras.eta0 = p.eta0 || 1.0;
   _extras.lambda = p.lambda != null ? p.lambda : 0.06;
-  _extras.rdBase = p.rdBase != null ? p.rdBase : 0.50;
+  _extras.rdBase = p.rdBase != null ? p.rdBase : 1.20;
   _extras.kappa = p.kappa != null ? p.kappa : 0.12;
   _extras.preInvestFrac = p.preInvestFrac || 0.8;
   _extras.overhead = p.overhead != null ? p.overhead : 0.5;
   _extras.switchMax = p.switchMax || 0.50;
   _extras.osMaxQuality = p.osMaxQuality || 0.95;
 
-  sv('TAM0', p.TAM0); sv('D0', (p.D0 || 0.12) * 100); sv('Dmax', (p.Dmax || 0.55) * 100);
+  sv('TAM0', p.TAM0); sv('D0', (p.D0 || 0.15) * 100); sv('Dmax', (p.Dmax || 0.55) * 100);
   sv('initialCapex', p.initialCapex); sv('capexGrowth', p.capexGrowth * 100);
   sv('theta', (p.theta || 0.55) * 100);
   sv('nFrontier', p.nFrontier); sv('gamma', p.gamma * 100);
