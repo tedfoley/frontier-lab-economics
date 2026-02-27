@@ -179,9 +179,10 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
             <div class="me-eq">u = K_total / D_frontier   (supply/demand ratio; u &gt; 1 = overcapacity)</div>
             <div class="me-eq">σ_eff = σ_base·(0.5 + 0.5·γ_eff),  γ_eff = γ·(1−switchCost)</div>
             <div class="me-eq">u ≥ 1 (overcapacity):  Rev = (D_f/N)·(1/u)^σ_eff + salvage</div>
-            <div class="me-eq">u &lt; 1 (scarcity):     Rev = (D_f/N) · min((1/u)^ρ_eff, S_max_eff)</div>
-            <div class="me-eq">ρ_eff = ρ·(2 − γ_eff),  S_max_eff = 1 + (S_max − 1)·(2 − γ_eff)</div>
-            <p class="me-note">When supply exceeds demand (u≥1), prices collapse at rate <strong>σ_base</strong> amplified by competition, plus <strong>salvage revenue</strong> from excess capacity. When scarce (u&lt;1), <strong>Scarcity Power ρ</strong> captures premium up to <strong>S_max</strong>, both modulated by <strong>γ_eff</strong>: differentiated products (low γ) amplify scarcity pricing; commoditized products (high γ) weaken it. Per Kreps &amp; Scheinkman (1983), capacity constraints limit undercutting, but substitutability still modulates how much premium firms can extract.</p>
+            <div class="me-eq">u &lt; 1 (scarcity, default):  Rev = (D_f/N) · min((1/u)^ρ, S_max)</div>
+            <div class="me-eq">u &lt; 1 (diff. scarcity opt-in): Rev = (D_f/N) · min((1/u)^ρ_eff, S_max_eff)</div>
+            <div class="me-eq">  where f = 0.5 + 0.5·(1 − γ_eff),  ρ_eff = ρ·f,  S_max_eff = 1 + (S_max − 1)·f</div>
+            <p class="me-note">When supply exceeds demand (u≥1), prices collapse at rate <strong>σ_base</strong> amplified by competition, plus <strong>salvage revenue</strong> from excess capacity. When scarce (u&lt;1), the default Kreps &amp; Scheinkman (1983) model uses <strong>ρ</strong> and <strong>S_max</strong> directly — γ has no effect because capacity constraints eliminate undercutting. With the optional <em>"Differentiation affects scarcity pricing"</em> toggle, γ_eff modulates scarcity power: differentiated products (low γ) retain full pricing power (f=1.0), while commoditized products (high γ) see reduced premiums (f→0.5).</p>
 
             <h4>Cost Structure</h4>
             <div class="me-eq">Cost_i(t) = I(t) + talentCost·(1+talentGrowth)^t + overhead</div>
@@ -194,7 +195,7 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
               <tr><td>Initial Adoption D₀</td><td>Higher (more early demand)</td></tr>
               <tr><td>Max Adoption D_max</td><td>Higher (larger long-run market)</td></tr>
               <tr><td># Labs N</td><td>Lower (split revenue, more overcap)</td></tr>
-              <tr><td>Substitutability γ</td><td>Lower (weaker scarcity premium, faster overcapacity collapse)</td></tr>
+              <tr><td>Substitutability γ</td><td>Lower (more price competition; also reduces scarcity premium if diff. scarcity enabled)</td></tr>
               <tr><td>Yr 1 Compute</td><td>Mixed (more capacity but higher cost)</td></tr>
               <tr><td>Capex Growth</td><td>Lower (faster cost growth, overcapacity)</td></tr>
               <tr><td>Inference Split θ</td><td>Mixed (more serving capacity vs less training)</td></tr>
@@ -295,6 +296,10 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
           <div class="slider-row"><label>&gamma; Drift / Year</label>
             <input type="range" id="s-gammaDrift" min="-5" max="5" step="0.5" value="0">
             <span class="val" id="v-gammaDrift">0.00</span></div>
+          <div class="checkbox-row">
+            <input type="checkbox" id="s-scarcityDiff">
+            <label for="s-scarcityDiff">Differentiation affects scarcity pricing</label>
+          </div>
         </div>
         <div class="control-group">
           <h3>Pricing Dynamics</h3>
@@ -598,14 +603,21 @@ function runSim(p) {
         revenue += salvageCapture * (p.salvageMargin || 0.20);
       }
     } else {
-      // Scarcity: capacity constraints limit competition (Kreps & Scheinkman 1983),
-      // but substitutability still modulates pricing power.
-      // Low gamma (differentiated) → stronger scarcity premium
-      // High gamma (commoditized) → weaker scarcity premium
-      var scarcityFactor = 2.0 - gammaEff;
-      var rho_eff = p.rho * scarcityFactor;
-      var Smax_eff = 1 + (p.Smax - 1) * scarcityFactor;
-      var scarcityMult = Math.min(Math.pow(1 / u, rho_eff), Smax_eff);
+      // Scarcity: Kreps & Scheinkman (1983) — capacity constraints limit competition.
+      // Default: gamma has no effect (pure K&S assumption).
+      // Optional: when scarcityDiffEnabled, differentiation modulates pricing power.
+      // Uses symmetric form with overcapacity: scarcityFactor = 0.5 + 0.5*(1-gammaEff)
+      //   gammaEff=0 (differentiated) → factor=1.0 (full scarcity power)
+      //   gammaEff=1 (commoditized)   → factor=0.5 (half scarcity power)
+      var scarcityMult;
+      if (p.scarcityDiffEnabled) {
+        var scarcityFactor = 0.5 + 0.5 * (1 - gammaEff);
+        var rho_eff = p.rho * scarcityFactor;
+        var Smax_eff = 1 + (p.Smax - 1) * scarcityFactor;
+        scarcityMult = Math.min(Math.pow(1 / u, rho_eff), Smax_eff);
+      } else {
+        scarcityMult = Math.min(Math.pow(1 / u, p.rho), p.Smax);
+      }
       revenue = (Dfrontier / N) * scarcityMult;
     }
 
@@ -683,7 +695,8 @@ var BASE = {
   lookbackYears: 3, maxFirms: 7,
   nYears: 10, discountRate: 0.10,
   psi: 0.6, historicalTraining: 40, scalingAlpha: 0.07,
-  salvageMargin: 0.20, hardwareDeprec: 0.15, capacityDepreciation: 0.30
+  salvageMargin: 0.20, hardwareDeprec: 0.15, capacityDepreciation: 0.30,
+  scarcityDiffEnabled: false
 };
 
 var PRESETS = {
@@ -700,7 +713,8 @@ var PRESETS = {
     gamma: 0.55, nFrontier: 3, switchCost0: 0.20, switchGrowth: 0.025,
     osQuality0: 0.40, osCatchUp: 0.02, osSub: 0.30, phi: 0.35,
     D0: 0.10, Dmax: 0.65, rdBase: 2.50, gCapBase: 0.75, lambda: 0.07,
-    Smax: 1.50, rho: 0.35, sigmaBase: 1.20
+    Smax: 1.50, rho: 0.35, sigmaBase: 1.20,
+    scarcityDiffEnabled: true
   }),
   agi: Object.assign({}, BASE, {
     TAM0: 150, gCapBase: 0.85, lambda: 0.08,
@@ -726,7 +740,8 @@ var _extras = {
   eta0: 1.0, lambda: 0.06, rdBase: 1.80, kappa: 0.12,
   preInvestFrac: 0.8, overhead: 0.3, switchMax: 0.50, osMaxQuality: 0.95,
   psi: 0.6, historicalTraining: 40, scalingAlpha: 0.07,
-  salvageMargin: 0.20, hardwareDeprec: 0.15, capacityDepreciation: 0.30
+  salvageMargin: 0.20, hardwareDeprec: 0.15, capacityDepreciation: 0.30,
+  scarcityDiffEnabled: false
 };
 
 function getParams() {
@@ -746,6 +761,7 @@ function getParams() {
     talentCost0: +gv('talentCost0'), talentGrowth: gv('talentGrowth') / 100,
     osCatchUp: gv('osCatchUp') / 100, discountRate: gv('discountRate') / 100,
     enableEntryExit: document.getElementById('s-entryExit').checked,
+    scarcityDiffEnabled: document.getElementById('s-scarcityDiff').checked,
     exitThreshold: +gv('exitThresh'), entryThreshold: +gv('entryThresh'),
     lookbackYears: +gv('lookback'), maxFirms: 7,
     // Non-slider params from current preset
@@ -778,6 +794,7 @@ function setParams(p) {
   _extras.salvageMargin = p.salvageMargin != null ? p.salvageMargin : 0.20;
   _extras.hardwareDeprec = p.hardwareDeprec != null ? p.hardwareDeprec : 0.15;
   _extras.capacityDepreciation = p.capacityDepreciation != null ? p.capacityDepreciation : 0.30;
+  _extras.scarcityDiffEnabled = !!p.scarcityDiffEnabled;
 
   sv('TAM0', p.TAM0); sv('D0', (p.D0 || 0.09) * 100); sv('Dmax', (p.Dmax || 0.55) * 100);
   sv('initialCapex', p.initialCapex); sv('capexGrowth', p.capexGrowth * 100);
@@ -799,6 +816,7 @@ function setParams(p) {
   sv('osCatchUp', (p.osCatchUp || 0.03) * 100);
   sv('discountRate', (p.discountRate || 0.10) * 100);
   document.getElementById('s-entryExit').checked = !!p.enableEntryExit;
+  document.getElementById('s-scarcityDiff').checked = !!p.scarcityDiffEnabled;
   sv('exitThresh', p.exitThreshold || 12); sv('entryThresh', p.entryThreshold || 20);
   sv('lookback', p.lookbackYears || 3);
   toggleEntryExit();
@@ -1162,6 +1180,9 @@ document.querySelectorAll('input[type=range]').forEach(function(s) {
 });
 document.getElementById('s-entryExit').addEventListener('change', function() {
   toggleEntryExit(); updateSimCharts();
+});
+document.getElementById('s-scarcityDiff').addEventListener('change', function() {
+  updateSimCharts();
 });
 
 // Init
