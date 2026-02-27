@@ -1076,12 +1076,12 @@ function updateSensitivity() {
   var highs = impacts.map(function(i) { return i.high; });
   var lows = impacts.map(function(i) { return i.low; });
   Plotly.react('chart-tornado', [
-    { y: names, x: highs, type: 'bar', orientation: 'h', name: 'Optimistic (+' + sensPctLabel + '%)',
+    { y: names, x: highs, type: 'bar', orientation: 'h', name: 'Optimistic',
       marker: { color: 'rgba(22,163,74,0.7)' } },
-    { y: names, x: lows, type: 'bar', orientation: 'h', name: 'Pessimistic (−' + sensPctLabel + '%)',
+    { y: names, x: lows, type: 'bar', orientation: 'h', name: 'Pessimistic',
       marker: { color: 'rgba(220,38,38,0.7)' } }
   ], Object.assign({}, plotLayout, {
-    title: 'Sensitivity: Change in 10-Year NPV ($B)', barmode: 'overlay',
+    title: 'Sensitivity \u00b1' + sensPctLabel + '%: Change in 10-Year NPV ($B)', barmode: 'overlay',
     margin: { l: 200, r: 30, t: 40, b: 50 },
     xaxis: { title: 'Change in NPV ($B)', zeroline: true, zerolinewidth: 2, gridcolor: '#e2e8f0' },
     yaxis: { automargin: true }
