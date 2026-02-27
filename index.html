@@ -1047,7 +1047,7 @@ function updateSensitivity() {
     ['lambda', 0.02, 0.10, 'Training → TAM Feedback'],
     ['sigmaBase', 2.50, 0.80, 'Overcapacity Sensitivity'],
     ['Smax', 1.05, 2.00, 'Max Scarcity Premium'],
-    ['capexDecel', 0.90, 0.35, 'Growth Deceleration'],
+    ['capexDecel', 0.75, 0.45, 'Growth Deceleration'],
     ['talentCost0', 1.5, 0.2, 'Talent Cost ($B)'],
     ['rho', 0.10, 0.50, 'Scarcity Power (rho)']
   ];
@@ -1077,7 +1077,7 @@ function updateSensitivity() {
   }), plotCfg);
 
   // Break-even heatmap: TAM0 vs gamma
-  var tRows = 25, gRows = 25;
+  var tRows = 15, gRows = 15;
   var tRange = [], gRange = [], zData = [];
   for (var ti = 0; ti < tRows; ti++) { tRange.push(15 + ti * 150 / (tRows - 1)); }
   for (var gi = 0; gi < gRows; gi++) { gRange.push(0.30 + gi * 0.65 / (gRows - 1)); }
@@ -1090,30 +1090,38 @@ function updateSensitivity() {
     }
     zData.push(row);
   }
-  var xLabels = tRange.map(function(t) { return '$' + t.toFixed(0) + 'B'; });
-  var yLabels = gRange.map(function(g) { return g.toFixed(2); });
+  // Compute symmetric colorscale around median value
+  var allVals = [];
+  for (var ri = 0; ri < zData.length; ri++) {
+    for (var ci = 0; ci < zData[ri].length; ci++) { allVals.push(zData[ri][ci]); }
+  }
+  allVals.sort(function(a, b) { return a - b; });
+  var zMedian = allVals[Math.floor(allVals.length / 2)];
+  var zSpread = Math.max(Math.abs(allVals[0] - zMedian), Math.abs(allVals[allVals.length - 1] - zMedian));
+  var zMin = zMedian - zSpread;
+  var zMax = zMedian + zSpread;
 
   Plotly.react('chart-breakeven', [{
-    z: zData, x: xLabels, y: yLabels,
+    z: zData, x: tRange, y: gRange,
     type: 'heatmap', colorscale: [[0, '#dc2626'], [0.5, '#fefce8'], [1, '#16a34a']],
-    zmid: 0, colorbar: { title: 'NPV ($B)' }
+    zmin: zMin, zmax: zMax, colorbar: { title: 'NPV ($B)' }
   }, {
-    x: xLabels, y: yLabels, z: zData,
+    x: tRange, y: gRange, z: zData,
     type: 'contour', contours: { start: 0, end: 0, size: 1 }, showscale: false,
     line: { color: 'black', width: 3 }, ncontours: 1
   }], Object.assign({}, plotLayout, {
     title: 'Break-Even Frontier: TAM vs. Substitutability',
     margin: { l: 60, r: 30, t: 40, b: 60 },
-    xaxis: { title: 'Total Addressable Market (TAM₀)' },
+    xaxis: { title: 'Total Addressable Market (TAM₀)', tickprefix: '$', ticksuffix: 'B' },
     yaxis: { title: 'Substitutability (gamma)' },
     annotations: [
-      { x: '$' + BASE.TAM0 + 'B', y: BASE.gamma.toFixed(2), text: '<b>Base</b>',
+      { x: BASE.TAM0, y: BASE.gamma, text: '<b>Base</b>',
         showarrow: true, arrowhead: 2, ax: 40, ay: -35,
         font: { size: 12, color: '#1e293b' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 },
-      { x: '$' + PRESETS.bear.TAM0 + 'B', y: PRESETS.bear.gamma.toFixed(2), text: '<b>Bear</b>',
+      { x: PRESETS.bear.TAM0, y: PRESETS.bear.gamma, text: '<b>Bear</b>',
         showarrow: true, arrowhead: 2, ax: -55, ay: 5,
         font: { size: 12, color: '#dc2626' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 },
-      { x: '$' + PRESETS.bull.TAM0 + 'B', y: PRESETS.bull.gamma.toFixed(2), text: '<b>Bull</b>',
+      { x: PRESETS.bull.TAM0, y: PRESETS.bull.gamma, text: '<b>Bull</b>',
         showarrow: true, arrowhead: 2, ax: 10, ay: 45,
         font: { size: 12, color: '#16a34a' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 }
     ]
