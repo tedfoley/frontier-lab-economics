@@ -1109,10 +1109,9 @@ function updateHeatmap() {
     for (var ci = 0; ci < zData[ri].length; ci++) { allVals.push(zData[ri][ci]); }
   }
   allVals.sort(function(a, b) { return a - b; });
-  var zMedian = allVals[Math.floor(allVals.length / 2)];
-  var zSpread = Math.max(Math.abs(allVals[0] - zMedian), Math.abs(allVals[allVals.length - 1] - zMedian));
-  var zMin = zMedian - zSpread;
-  var zMax = zMedian + zSpread;
+  var zSpread = Math.max(Math.abs(allVals[0]), Math.abs(allVals[allVals.length - 1]));
+  var zMin = -zSpread;
+  var zMax = zSpread;
 
   Plotly.react('chart-breakeven', [{
     z: zData, x: tRange, y: gRange,
