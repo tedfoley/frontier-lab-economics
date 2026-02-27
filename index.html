@@ -404,6 +404,11 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
     <p style="margin-top:.5rem;color:var(--muted);font-size:.82rem">Charts use Base Case parameters and are computed once on first load.
       <button onclick="recalcSensitivity()" style="margin-left:.6rem;padding:.25rem .7rem;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--primary);font-size:.8rem;cursor:pointer">&#8635; Recalculate</button>
     </p>
+    <div style="margin-top:.6rem;display:flex;align-items:center;gap:.6rem;font-size:.85rem">
+      <label for="sens-pct" style="color:var(--muted)">Sensitivity Swing:</label>
+      <input id="sens-pct" type="range" min="1" max="50" value="10" style="width:140px" oninput="document.getElementById('sens-pct-val').textContent=this.value+'%'; recalcSensitivity()">
+      <span id="sens-pct-val" style="font-weight:600;min-width:2.5rem">10%</span>
+    </div>
   </div>
   <div class="chart-box"><div id="chart-tornado" style="height:560px"></div></div>
   <div class="section-header" style="margin-top:2rem">
@@ -1051,11 +1056,14 @@ function updateSensitivity() {
     ['talentCost0', 'Talent Cost ($B)'],
     ['rho', 'Scarcity Power (rho)']
   ];
+  var sensPctInput = document.getElementById('sens-pct');
+  var sensPct = sensPctInput ? parseInt(sensPctInput.value) / 100 : 0.10;
+  var sensPctLabel = Math.round(sensPct * 100);
   var baseNpv = runSim(BASE).npvCum[9];
   var impacts = [];
   sensParams.forEach(function(sp) {
-    var pLow = Object.assign({}, BASE); pLow[sp[0]] = BASE[sp[0]] * 0.9;
-    var pHigh = Object.assign({}, BASE); pHigh[sp[0]] = BASE[sp[0]] * 1.1;
+    var pLow = Object.assign({}, BASE); pLow[sp[0]] = BASE[sp[0]] * (1 - sensPct);
+    var pHigh = Object.assign({}, BASE); pHigh[sp[0]] = BASE[sp[0]] * (1 + sensPct);
     var nL = runSim(pLow).npvCum[9] - baseNpv;
     var nH = runSim(pHigh).npvCum[9] - baseNpv;
     // Assign green (optimistic) to whichever direction improves NPV
@@ -1068,14 +1076,14 @@ function updateSensitivity() {
   var highs = impacts.map(function(i) { return i.high; });
   var lows = impacts.map(function(i) { return i.low; });
   Plotly.react('chart-tornado', [
-    { y: names, x: highs, type: 'bar', orientation: 'h', name: 'Optimistic',
+    { y: names, x: highs, type: 'bar', orientation: 'h', name: 'Optimistic (+' + sensPctLabel + '%)',
       marker: { color: 'rgba(22,163,74,0.7)' } },
-    { y: names, x: lows, type: 'bar', orientation: 'h', name: 'Pessimistic',
+    { y: names, x: lows, type: 'bar', orientation: 'h', name: 'Pessimistic (−' + sensPctLabel + '%)',
       marker: { color: 'rgba(220,38,38,0.7)' } }
   ], Object.assign({}, plotLayout, {
     title: 'Sensitivity: Change in 10-Year NPV ($B)', barmode: 'overlay',
     margin: { l: 200, r: 30, t: 40, b: 50 },
-    xaxis: Object.assign({}, plotLayout.xaxis, { title: 'Change in NPV ($B)', zeroline: true, zerolinewidth: 2 }),
+    xaxis: { title: 'Change in NPV ($B)', zeroline: true, zerolinewidth: 2, gridcolor: '#e2e8f0' },
     yaxis: { automargin: true }
   }), plotCfg);
 
