@@ -1029,36 +1029,39 @@ function updateScenarios() {
 }
 
 function updateSensitivity() {
-  // Tornado chart
+  // Tornado chart: ±10% sensitivity around each base parameter
   var sensParams = [
-    ['TAM0', 25, 120, 'Total Addressable Market'],
-    ['D0', 0.04, 0.18, 'Initial Adoption Rate'],
-    ['Dmax', 0.35, 0.75, 'Max Adoption'],
-    ['nFrontier', 6, 2, '# Frontier Labs'],
-    ['gamma', 0.95, 0.45, 'Substitutability (gamma)'],
-    ['capexGrowth', 2.50, 0.80, 'Capex Growth Rate'],
-    ['initialCapex', 3.0, 0.5, 'Yr 1 Compute ($B)'],
-    ['theta', 0.75, 0.35, 'Inference Split (theta)'],
-    ['osQuality0', 0.75, 0.25, 'OS Quality'],
-    ['osSub', 0.65, 0.20, 'OS Substitutability'],
-    ['phi', 0.75, 0.25, '% Contestable by OS'],
-    ['switchCost0', 0.02, 0.30, 'Switching Costs'],
-    ['gCapBase', 0.40, 0.85, 'TAM Growth Rate'],
-    ['lambda', 0.02, 0.10, 'Training → TAM Feedback'],
-    ['sigmaBase', 2.50, 0.80, 'Overcapacity Sensitivity'],
-    ['Smax', 1.05, 2.00, 'Max Scarcity Premium'],
-    ['capexDecel', 0.75, 0.45, 'Growth Deceleration'],
-    ['talentCost0', 1.5, 0.2, 'Talent Cost ($B)'],
-    ['rho', 0.10, 0.50, 'Scarcity Power (rho)']
+    ['TAM0', 'Total Addressable Market'],
+    ['D0', 'Initial Adoption Rate'],
+    ['Dmax', 'Max Adoption'],
+    ['nFrontier', '# Frontier Labs'],
+    ['gamma', 'Substitutability (gamma)'],
+    ['capexGrowth', 'Capex Growth Rate'],
+    ['initialCapex', 'Yr 1 Compute ($B)'],
+    ['theta', 'Inference Split (theta)'],
+    ['osQuality0', 'OS Quality'],
+    ['osSub', 'OS Substitutability'],
+    ['phi', '% Contestable by OS'],
+    ['switchCost0', 'Switching Costs'],
+    ['gCapBase', 'TAM Growth Rate'],
+    ['lambda', 'Training → TAM Feedback'],
+    ['sigmaBase', 'Overcapacity Sensitivity'],
+    ['Smax', 'Max Scarcity Premium'],
+    ['capexDecel', 'Growth Deceleration'],
+    ['talentCost0', 'Talent Cost ($B)'],
+    ['rho', 'Scarcity Power (rho)']
   ];
   var baseNpv = runSim(BASE).npvCum[9];
   var impacts = [];
   sensParams.forEach(function(sp) {
-    var pLow = Object.assign({}, BASE); pLow[sp[0]] = sp[1];
-    var pHigh = Object.assign({}, BASE); pHigh[sp[0]] = sp[2];
+    var pLow = Object.assign({}, BASE); pLow[sp[0]] = BASE[sp[0]] * 0.9;
+    var pHigh = Object.assign({}, BASE); pHigh[sp[0]] = BASE[sp[0]] * 1.1;
     var nL = runSim(pLow).npvCum[9] - baseNpv;
     var nH = runSim(pHigh).npvCum[9] - baseNpv;
-    impacts.push({ name: sp[3], low: nL, high: nH, range: Math.abs(nH - nL) });
+    // Assign green (optimistic) to whichever direction improves NPV
+    var optimistic = Math.max(nL, nH);
+    var pessimistic = Math.min(nL, nH);
+    impacts.push({ name: sp[1], low: pessimistic, high: optimistic, range: Math.abs(nH - nL) });
   });
   impacts.sort(function(a, b) { return a.range - b.range; });
   var names = impacts.map(function(i) { return i.name; });
