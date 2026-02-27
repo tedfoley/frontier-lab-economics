@@ -1033,8 +1033,8 @@ function updateScenarios() {
     shapes: [zeroLine] }), plotCfg);
 }
 
-function updateSensitivity() {
-  // Tornado chart: ±10% sensitivity around each base parameter
+function updateTornado() {
+  // Tornado chart: ±X% sensitivity around each base parameter
   var sensParams = [
     ['TAM0', 'Total Addressable Market'],
     ['D0', 'Initial Adoption Rate'],
@@ -1086,7 +1086,9 @@ function updateSensitivity() {
     xaxis: { title: 'Change in NPV ($B)', zeroline: true, zerolinewidth: 2, gridcolor: '#e2e8f0' },
     yaxis: { automargin: true }
   }), plotCfg);
+}
 
+function updateHeatmap() {
   // Break-even heatmap: TAM0 vs gamma
   var tRows = 15, gRows = 15;
   var tRange = [], gRange = [], zData = [];
@@ -1139,6 +1141,11 @@ function updateSensitivity() {
   }), plotCfg);
 }
 
+function updateSensitivity() {
+  updateTornado();
+  updateHeatmap();
+}
+
 // ================================================================
 // UI HANDLERS
 // ================================================================
@@ -1159,7 +1166,7 @@ function loadPreset(name) {
 
 // Tab switching
 var _sensComputed = false;
-function recalcSensitivity() { _sensComputed = false; updateSensitivity(); _sensComputed = true; }
+function recalcSensitivity() { _sensComputed = false; updateTornado(); _sensComputed = true; }
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1173,6 +1180,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
 
 // Slider & checkbox events
 document.querySelectorAll('input[type=range]').forEach(function(s) {
+  if (s.id === 'sens-pct') return; // skip sensitivity slider — it has its own handler
   s.addEventListener('input', function() { updateLabels(); updateSimCharts(); });
 });
 document.getElementById('s-entryExit').addEventListener('change', function() {
