@@ -179,8 +179,9 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
             <div class="me-eq">u = K_total / D_frontier   (supply/demand ratio; u &gt; 1 = overcapacity)</div>
             <div class="me-eq">σ_eff = σ_base·(0.5 + 0.5·γ_eff),  γ_eff = γ·(1−switchCost)</div>
             <div class="me-eq">u ≥ 1 (overcapacity):  Rev = (D_f/N)·(1/u)^σ_eff + salvage</div>
-            <div class="me-eq">u &lt; 1 (scarcity):     Rev = (D_f/N) · min((1/u)^ρ, S_max)</div>
-            <p class="me-note">When supply exceeds demand (u≥1), prices collapse at rate <strong>σ_base</strong> amplified by competition, plus <strong>salvage revenue</strong> from excess capacity. When scarce (u&lt;1), <strong>Scarcity Power ρ</strong> captures premium up to <strong>S_max</strong>. Per Kreps &amp; Scheinkman (1983), capacity constraints eliminate undercutting incentives — competition does NOT erode scarcity rents.</p>
+            <div class="me-eq">u &lt; 1 (scarcity):     Rev = (D_f/N) · min((1/u)^ρ_eff, S_max_eff)</div>
+            <div class="me-eq">ρ_eff = ρ·(2 − γ_eff),  S_max_eff = 1 + (S_max − 1)·(2 − γ_eff)</div>
+            <p class="me-note">When supply exceeds demand (u≥1), prices collapse at rate <strong>σ_base</strong> amplified by competition, plus <strong>salvage revenue</strong> from excess capacity. When scarce (u&lt;1), <strong>Scarcity Power ρ</strong> captures premium up to <strong>S_max</strong>, both modulated by <strong>γ_eff</strong>: differentiated products (low γ) amplify scarcity pricing; commoditized products (high γ) weaken it. Per Kreps &amp; Scheinkman (1983), capacity constraints limit undercutting, but substitutability still modulates how much premium firms can extract.</p>
 
             <h4>Cost Structure</h4>
             <div class="me-eq">Cost_i(t) = I(t) + talentCost·(1+talentGrowth)^t + overhead</div>
@@ -193,7 +194,7 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
               <tr><td>Initial Adoption D₀</td><td>Higher (more early demand)</td></tr>
               <tr><td>Max Adoption D_max</td><td>Higher (larger long-run market)</td></tr>
               <tr><td># Labs N</td><td>Lower (split revenue, more overcap)</td></tr>
-              <tr><td>Substitutability γ</td><td>Lower (pricing power collapses faster)</td></tr>
+              <tr><td>Substitutability γ</td><td>Lower (weaker scarcity premium, faster overcapacity collapse)</td></tr>
               <tr><td>Yr 1 Compute</td><td>Mixed (more capacity but higher cost)</td></tr>
               <tr><td>Capex Growth</td><td>Lower (faster cost growth, overcapacity)</td></tr>
               <tr><td>Inference Split θ</td><td>Mixed (more serving capacity vs less training)</td></tr>
@@ -597,11 +598,14 @@ function runSim(p) {
         revenue += salvageCapture * (p.salvageMargin || 0.20);
       }
     } else {
-      // Scarcity: all firms at capacity, Kreps & Scheinkman (1983) logic applies.
-      // Capacity constraints eliminate price competition incentive — no firm can
-      // undercut to steal share when already selling everything it can produce.
-      // rho and Smax control how much scarcity translates to pricing power.
-      var scarcityMult = Math.min(Math.pow(1 / u, p.rho), p.Smax);
+      // Scarcity: capacity constraints limit competition (Kreps & Scheinkman 1983),
+      // but substitutability still modulates pricing power.
+      // Low gamma (differentiated) → stronger scarcity premium
+      // High gamma (commoditized) → weaker scarcity premium
+      var scarcityFactor = 2.0 - gammaEff;
+      var rho_eff = p.rho * scarcityFactor;
+      var Smax_eff = 1 + (p.Smax - 1) * scarcityFactor;
+      var scarcityMult = Math.min(Math.pow(1 / u, rho_eff), Smax_eff);
       revenue = (Dfrontier / N) * scarcityMult;
     }
 
