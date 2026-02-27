@@ -233,8 +233,8 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
           <input type="range" id="s-initialCapex" min="0.5" max="10" step="0.5" value="1.5">
           <span class="val" id="v-initialCapex">$1.5B</span></div>
         <div class="slider-row"><label>Capex Growth</label>
-          <input type="range" id="s-capexGrowth" min="50" max="250" step="10" value="180">
-          <span class="val" id="v-capexGrowth">180%</span></div>
+          <input type="range" id="s-capexGrowth" min="50" max="300" step="10" value="220">
+          <span class="val" id="v-capexGrowth">220%</span></div>
         <div class="slider-row"><label>Inference Split (&theta;)</label>
           <input type="range" id="s-theta" min="30" max="80" step="5" value="55">
           <span class="val" id="v-theta">55%</span></div>
@@ -282,9 +282,9 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
         </div>
         <div class="control-group">
           <h3>Market Structure</h3>
-          <div class="slider-row"><label>TAM Growth Rate</label>
-            <input type="range" id="s-gCapBase" min="10" max="50" step="1" value="30">
-            <span class="val" id="v-gCapBase">30%</span></div>
+            <div class="slider-row"><label>TAM Growth Rate</label>
+              <input type="range" id="s-gCapBase" min="10" max="90" step="1" value="64">
+              <span class="val" id="v-gCapBase">64%</span></div>
           <div class="slider-row"><label>Switching Cost</label>
             <input type="range" id="s-switchCost0" min="0" max="50" step="1" value="10">
             <span class="val" id="v-switchCost0">0.10</span></div>
@@ -665,9 +665,9 @@ function runSim(p) {
 // PRESETS
 // ================================================================
 var BASE = {
-  initialCapex: 1.5, capexGrowth: 1.80, capexDecel: 0.60, decelStart: 2,
+  initialCapex: 1.5, capexGrowth: 2.20, capexDecel: 0.60, decelStart: 2,
   theta: 0.55, eta0: 1.0, etaGrowth: 0.10, tau: 2, preInvestFrac: 0.8,
-  TAM0: 50, gCapBase: 0.25, lambda: 0.06,
+  TAM0: 50, gCapBase: 0.64, lambda: 0.06,
   D0: 0.09, Dmax: 0.55, rdBase: 1.80, kappa: 0.12,
   nFrontier: 4, gamma: 0.75, gammaDrift: 0,
   switchCost0: 0.10, switchGrowth: 0.015, switchMax: 0.50,
@@ -687,18 +687,18 @@ var PRESETS = {
   bear: Object.assign({}, BASE, {
     gamma: 0.92, nFrontier: 5, switchCost0: 0.03, switchGrowth: 0.005,
     osQuality0: 0.65, osCatchUp: 0.04, osSub: 0.55, phi: 0.65,
-    D0: 0.06, Dmax: 0.45, rdBase: 1.20, gCapBase: 0.20, lambda: 0.03,
-    capexGrowth: 1.50, initialCapex: 2.0,
+    D0: 0.06, Dmax: 0.45, rdBase: 1.20, gCapBase: 0.45, lambda: 0.03,
+    capexGrowth: 1.80, initialCapex: 2.0,
     Smax: 1.10, sigmaBase: 1.70
   }),
   bull: Object.assign({}, BASE, {
     gamma: 0.55, nFrontier: 3, switchCost0: 0.20, switchGrowth: 0.025,
     osQuality0: 0.40, osCatchUp: 0.02, osSub: 0.30, phi: 0.35,
-    D0: 0.10, Dmax: 0.65, rdBase: 2.50, gCapBase: 0.30, lambda: 0.07,
+    D0: 0.10, Dmax: 0.65, rdBase: 2.50, gCapBase: 0.75, lambda: 0.07,
     Smax: 1.50, rho: 0.35, sigmaBase: 1.20
   }),
   agi: Object.assign({}, BASE, {
-    TAM0: 150, gCapBase: 0.35, lambda: 0.08,
+    TAM0: 150, gCapBase: 0.85, lambda: 0.08,
     D0: 0.05, Dmax: 0.70, rdBase: 1.50, kappa: 0.20,
     Smax: 1.80, rho: 0.35, gamma: 0.70
   })
@@ -708,7 +708,7 @@ var PRESET_LABELS = { bear: 'Bear Case', base: 'Base Case', bull: 'Bull Case', a
 var PRESET_COLORS = { bear: '#dc2626', base: '#2563eb', bull: '#16a34a', agi: '#7c3aed' };
 var PRESET_NOTES = {
   bear: 'Near-perfect substitutes, 5 aggressive investors, fast OS catch-up. Bear thesis: commodity overcapacity — firms invest heavily but can\'t capture value. Worst NPV of all scenarios.',
-  base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. Calibrated to ~$1B rev / ~$2B cost per firm in 2024.',
+  base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. Calibrated to ~$1B rev / ~$2.4B cost per firm in 2024. Breaks even by 2030.',
   bull: 'Meaningful differentiation, 3 firms, strong switching costs, fast adoption. Moats enable scarcity pricing; breaks even by 2025.',
   agi: 'Transformative capability breakthrough: massive TAM ($150B+), explosive growth, demand outpaces even aggressive investment'
 };
@@ -718,8 +718,8 @@ var PRESET_NOTES = {
 // ================================================================
 // Non-slider params that vary by preset (updated when preset loaded)
 var _extras = {
-  eta0: 1.0, lambda: 0.06, rdBase: 0.55, kappa: 0.12,
-  preInvestFrac: 0.8, overhead: 0.5, switchMax: 0.50, osMaxQuality: 0.95,
+  eta0: 1.0, lambda: 0.06, rdBase: 1.80, kappa: 0.12,
+  preInvestFrac: 0.8, overhead: 0.3, switchMax: 0.50, osMaxQuality: 0.95,
   psi: 0.6, historicalTraining: 40, scalingAlpha: 0.07,
   salvageMargin: 0.20, hardwareDeprec: 0.15, capacityDepreciation: 0.30
 };
@@ -1160,6 +1160,7 @@ document.getElementById('s-entryExit').addEventListener('change', function() {
 });
 
 // Init
+loadPreset('base');
 updateLabels();
 updateSimCharts();
 </script>
