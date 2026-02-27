@@ -217,46 +217,46 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
     <aside class="controls">
       <div class="control-group">
         <h3>Market Demand</h3>
-        <div class="slider-row"><label>TAM ($B)</label>
+        <div class="slider-row"><label title="Initial Total Addressable Market in $B (the starting market size). ⬆">TAM ($B)</label>
           <input type="range" id="s-TAM0" min="10" max="200" step="5" value="50">
           <span class="val" id="v-TAM0">$50B</span></div>
-        <div class="slider-row"><label>Initial Adoption</label>
+        <div class="slider-row"><label title="Initial adoption fraction of TAM at t=0 (seeds the Bass S-curve). ⬆">Initial Adoption</label>
           <input type="range" id="s-D0" min="3" max="25" step="1" value="9">
           <span class="val" id="v-D0">9%</span></div>
-        <div class="slider-row"><label>Max Adoption</label>
+        <div class="slider-row"><label title="Maximum adoption fraction TAM can reach (long-run ceiling). ⬆">Max Adoption</label>
           <input type="range" id="s-Dmax" min="30" max="80" step="5" value="55">
           <span class="val" id="v-Dmax">55%</span></div>
       </div>
       <div class="control-group">
         <h3>Investment</h3>
-        <div class="slider-row"><label>Yr 1 Compute ($B)</label>
+        <div class="slider-row"><label title="Year 1 compute spend per firm in $B. ↕">Yr 1 Compute ($B)</label>
           <input type="range" id="s-initialCapex" min="0.5" max="10" step="0.5" value="2.5">
           <span class="val" id="v-initialCapex">$2.5B</span></div>
-        <div class="slider-row"><label>Capex Growth</label>
+        <div class="slider-row"><label title="Annual capex growth rate during the full-growth phase. ⬇">Capex Growth</label>
           <input type="range" id="s-capexGrowth" min="50" max="300" step="10" value="250">
           <span class="val" id="v-capexGrowth">250%</span></div>
-        <div class="slider-row"><label>Inference Split (&theta;)</label>
+        <div class="slider-row"><label title="Fraction of compute allocated to inference vs. training. ↕">Inference Split (&theta;)</label>
           <input type="range" id="s-theta" min="30" max="80" step="5" value="55">
           <span class="val" id="v-theta">55%</span></div>
       </div>
       <div class="control-group">
         <h3>Competition</h3>
-        <div class="slider-row"><label># Frontier Labs (N)</label>
+        <div class="slider-row"><label title="Number of frontier AI labs competing in the market. ⬇"># Frontier Labs (N)</label>
           <input type="range" id="s-nFrontier" min="2" max="7" step="1" value="4">
           <span class="val" id="v-nFrontier">4</span></div>
-        <div class="slider-row"><label>Substitutability (&gamma;)</label>
+        <div class="slider-row"><label title="Product substitutability between firms (0=differentiated, 1=commodity). ⬇">Substitutability (&gamma;)</label>
           <input type="range" id="s-gamma" min="0" max="100" step="1" value="75">
           <span class="val" id="v-gamma">0.75</span></div>
       </div>
       <div class="control-group">
         <h3>Open Source</h3>
-        <div class="slider-row"><label>OS Quality</label>
+        <div class="slider-row"><label title="Initial open-source model quality (0–1 scale). ⬇">OS Quality</label>
           <input type="range" id="s-osQuality0" min="0" max="95" step="1" value="50">
           <span class="val" id="v-osQuality0">0.50</span></div>
-        <div class="slider-row"><label>OS Substitutability</label>
+        <div class="slider-row"><label title="How well OS models substitute for frontier models in contestable demand. ⬇">OS Substitutability</label>
           <input type="range" id="s-osSub" min="0" max="90" step="1" value="40">
           <span class="val" id="v-osSub">0.40</span></div>
-        <div class="slider-row"><label>% Contestable by OS</label>
+        <div class="slider-row"><label title="Fraction of total demand that is contestable by open source. ⬇">% Contestable by OS</label>
           <input type="range" id="s-phi" min="10" max="90" step="5" value="50">
           <span class="val" id="v-phi">50%</span></div>
       </div>
@@ -267,58 +267,58 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="advanced-content" id="adv-content">
         <div class="control-group" style="margin-top:.6rem">
           <h3>Investment Dynamics</h3>
-          <div class="slider-row"><label>Full Growth Years</label>
+          <div class="slider-row"><label title="Number of years of full capex growth before deceleration begins. ⬇">Full Growth Years</label>
             <input type="range" id="s-decelStart" min="0" max="5" step="1" value="2">
             <span class="val" id="v-decelStart">2</span></div>
-          <div class="slider-row"><label>Growth Deceleration</label>
+          <div class="slider-row"><label title="Geometric decay factor slowing capex growth after decelStart years. ⬇">Growth Deceleration</label>
             <input type="range" id="s-capexDecel" min="40" max="100" step="1" value="60">
             <span class="val" id="v-capexDecel">0.60</span></div>
-          <div class="slider-row"><label>Lead Time (&tau; yrs)</label>
+          <div class="slider-row"><label title="Lead time in years between committing capex and capacity coming online. ⬇">Lead Time (&tau; yrs)</label>
             <input type="range" id="s-tau" min="1" max="3" step="1" value="2">
             <span class="val" id="v-tau">2</span></div>
-          <div class="slider-row"><label>Efficiency Growth</label>
+          <div class="slider-row"><label title="Annual growth rate of hardware efficiency. ⬆">Efficiency Growth</label>
             <input type="range" id="s-etaGrowth" min="0" max="40" step="5" value="10">
             <span class="val" id="v-etaGrowth">10%</span></div>
         </div>
         <div class="control-group">
           <h3>Market Structure</h3>
-            <div class="slider-row"><label>TAM Growth Rate</label>
+            <div class="slider-row"><label title="Base annual TAM growth rate before scaling feedback is applied. ⬆">TAM Growth Rate</label>
               <input type="range" id="s-gCapBase" min="10" max="90" step="1" value="64">
               <span class="val" id="v-gCapBase">64%</span></div>
-          <div class="slider-row"><label>Switching Cost</label>
+          <div class="slider-row"><label title="Initial customer switching cost, which reduces effective γ and improves pricing power. ⬆">Switching Cost</label>
             <input type="range" id="s-switchCost0" min="0" max="50" step="1" value="10">
             <span class="val" id="v-switchCost0">0.10</span></div>
-          <div class="slider-row"><label>Switch Growth</label>
+          <div class="slider-row"><label title="Annual increase in switching costs (lock-in grows over time). ⬆">Switch Growth</label>
             <input type="range" id="s-switchGrowth" min="0" max="5" step="0.5" value="1.5">
             <span class="val" id="v-switchGrowth">0.015</span></div>
-          <div class="slider-row"><label>&gamma; Drift / Year</label>
+          <div class="slider-row"><label title="Annual change in γ over time (positive = commoditization). ⬇">&gamma; Drift / Year</label>
             <input type="range" id="s-gammaDrift" min="-5" max="5" step="0.5" value="0">
             <span class="val" id="v-gammaDrift">0.00</span></div>
         </div>
         <div class="control-group">
           <h3>Pricing Dynamics</h3>
-          <div class="slider-row"><label>Overcapacity &sigma;</label>
+          <div class="slider-row"><label title="Overcapacity price collapse sensitivity: higher = revenue falls faster when supply > demand. ⬇">Overcapacity &sigma;</label>
             <input type="range" id="s-sigmaBase" min="50" max="300" step="10" value="150">
             <span class="val" id="v-sigmaBase">1.50</span></div>
-          <div class="slider-row"><label>Scarcity Power (&rho;)</label>
+          <div class="slider-row"><label title="Scarcity pricing power exponent: higher = more revenue premium when demand > supply. ⬆">Scarcity Power (&rho;)</label>
             <input type="range" id="s-rho" min="10" max="60" step="5" value="25">
             <span class="val" id="v-rho">0.25</span></div>
-          <div class="slider-row"><label>Max Scarcity Premium</label>
+          <div class="slider-row"><label title="Maximum scarcity revenue multiplier (caps the scarcity premium). ⬆">Max Scarcity Premium</label>
             <input type="range" id="s-Smax" min="100" max="300" step="10" value="130">
             <span class="val" id="v-Smax">1.30</span></div>
         </div>
         <div class="control-group">
           <h3>Costs &amp; Other</h3>
-          <div class="slider-row"><label>Talent Cost ($B)</label>
+          <div class="slider-row"><label title="Initial annual talent/opex cost per firm in $B. ⬇">Talent Cost ($B)</label>
             <input type="range" id="s-talentCost0" min="0.1" max="3" step="0.1" value="0.6">
             <span class="val" id="v-talentCost0">$0.6B</span></div>
-          <div class="slider-row"><label>Talent Growth</label>
+          <div class="slider-row"><label title="Annual growth rate of talent costs. ⬇">Talent Growth</label>
             <input type="range" id="s-talentGrowth" min="5" max="40" step="1" value="15">
             <span class="val" id="v-talentGrowth">15%</span></div>
-          <div class="slider-row"><label>OS Catch-up Rate</label>
+          <div class="slider-row"><label title="Annual rate at which OS quality improves toward frontier. ⬇">OS Catch-up Rate</label>
             <input type="range" id="s-osCatchUp" min="0" max="8" step="0.5" value="3">
             <span class="val" id="v-osCatchUp">0.03</span></div>
-          <div class="slider-row"><label>Discount Rate</label>
+          <div class="slider-row"><label title="Annual discount rate used to compute NPV of future profits. ⬇">Discount Rate</label>
             <input type="range" id="s-discountRate" min="5" max="20" step="1" value="10">
             <span class="val" id="v-discountRate">10%</span></div>
         </div>
@@ -326,16 +326,16 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
           <h3>Entry / Exit</h3>
           <div class="checkbox-row">
             <input type="checkbox" id="s-entryExit">
-            <label for="s-entryExit">Enable dynamic entry/exit</label>
+            <label for="s-entryExit" title="Boolean toggle to enable dynamic firm entry and exit. ↕">Enable dynamic entry/exit</label>
           </div>
           <div class="entry-exit-params" id="ee-params">
-            <div class="slider-row"><label>Exit Threshold ($B)</label>
+            <div class="slider-row"><label title="Cumulative loss threshold (in $B) over lookbackYears that triggers a firm to exit. ⬇">Exit Threshold ($B)</label>
               <input type="range" id="s-exitThresh" min="3" max="30" step="1" value="12">
               <span class="val" id="v-exitThresh">$12B</span></div>
-            <div class="slider-row"><label>Entry Threshold ($B)</label>
+            <div class="slider-row"><label title="Cumulative profit threshold (in $B) over lookbackYears that triggers a new firm to enter. ⬆">Entry Threshold ($B)</label>
               <input type="range" id="s-entryThresh" min="5" max="50" step="1" value="20">
               <span class="val" id="v-entryThresh">$20B</span></div>
-            <div class="slider-row"><label>Look-back Years</label>
+            <div class="slider-row"><label title="Number of recent years used to evaluate entry/exit conditions. ↕">Look-back Years</label>
               <input type="range" id="s-lookback" min="1" max="5" step="1" value="3">
               <span class="val" id="v-lookback">3</span></div>
           </div>
