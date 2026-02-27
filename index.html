@@ -230,11 +230,11 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
       <div class="control-group">
         <h3>Investment</h3>
         <div class="slider-row"><label>Yr 1 Compute ($B)</label>
-          <input type="range" id="s-initialCapex" min="0.5" max="10" step="0.5" value="1.5">
-          <span class="val" id="v-initialCapex">$1.5B</span></div>
+          <input type="range" id="s-initialCapex" min="0.5" max="10" step="0.5" value="2.5">
+          <span class="val" id="v-initialCapex">$2.5B</span></div>
         <div class="slider-row"><label>Capex Growth</label>
-          <input type="range" id="s-capexGrowth" min="50" max="300" step="10" value="220">
-          <span class="val" id="v-capexGrowth">220%</span></div>
+          <input type="range" id="s-capexGrowth" min="50" max="300" step="10" value="250">
+          <span class="val" id="v-capexGrowth">250%</span></div>
         <div class="slider-row"><label>Inference Split (&theta;)</label>
           <input type="range" id="s-theta" min="30" max="80" step="5" value="55">
           <span class="val" id="v-theta">55%</span></div>
@@ -665,7 +665,7 @@ function runSim(p) {
 // PRESETS
 // ================================================================
 var BASE = {
-  initialCapex: 1.5, capexGrowth: 2.20, capexDecel: 0.60, decelStart: 2,
+  initialCapex: 2.5, capexGrowth: 2.50, capexDecel: 0.60, decelStart: 2,
   theta: 0.55, eta0: 1.0, etaGrowth: 0.10, tau: 2, preInvestFrac: 0.8,
   TAM0: 50, gCapBase: 0.64, lambda: 0.06,
   D0: 0.09, Dmax: 0.55, rdBase: 1.80, kappa: 0.12,
@@ -685,11 +685,12 @@ var BASE = {
 var PRESETS = {
   base: Object.assign({}, BASE),
   bear: Object.assign({}, BASE, {
-    gamma: 0.92, nFrontier: 5, switchCost0: 0.03, switchGrowth: 0.005,
-    osQuality0: 0.65, osCatchUp: 0.04, osSub: 0.55, phi: 0.65,
-    D0: 0.06, Dmax: 0.45, rdBase: 1.20, gCapBase: 0.45, lambda: 0.03,
-    capexGrowth: 1.80, initialCapex: 2.0,
-    Smax: 1.10, sigmaBase: 1.70
+    gamma: 0.82, nFrontier: 5, switchCost0: 0.06, switchGrowth: 0.005,
+    osQuality0: 0.50, osCatchUp: 0.03, osSub: 0.42, phi: 0.50,
+    D0: 0.08, Dmax: 0.50, rdBase: 1.80, gCapBase: 0.55, lambda: 0.05,
+    capexGrowth: 2.20, initialCapex: 3.0,
+    Smax: 1.10, sigmaBase: 1.10, TAM0: 70, rho: 0.25,
+    psi: 0.35
   }),
   bull: Object.assign({}, BASE, {
     gamma: 0.55, nFrontier: 3, switchCost0: 0.20, switchGrowth: 0.025,
@@ -707,8 +708,8 @@ var PRESETS = {
 var PRESET_LABELS = { bear: 'Bear Case', base: 'Base Case', bull: 'Bull Case', agi: 'AGI Shock' };
 var PRESET_COLORS = { bear: '#dc2626', base: '#2563eb', bull: '#16a34a', agi: '#7c3aed' };
 var PRESET_NOTES = {
-  bear: 'Near-perfect substitutes, 5 aggressive investors, fast OS catch-up. Bear thesis: commodity overcapacity — firms invest heavily but can\'t capture value. Worst NPV of all scenarios.',
-  base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. Calibrated to ~$1B rev / ~$2.4B cost per firm in 2024. Breaks even by 2030.',
+  bear: 'High substitutability, 5 aggressive investors, moderate OS pressure. Bear thesis: revenue grows steadily but never surpasses costs — perpetual value destruction. Worst NPV of all scenarios.',
+  base: 'Moderate competition and OS pressure, 4 firms, capacity leads demand by 2 years. ~$300B per-firm cost by 2030. Breaks even late in the decade.',
   bull: 'Meaningful differentiation, 3 firms, strong switching costs, fast adoption. Moats enable scarcity pricing; breaks even by 2025.',
   agi: 'Transformative capability breakthrough: massive TAM ($150B+), explosive growth, demand outpaces even aggressive investment'
 };
