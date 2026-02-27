@@ -40,10 +40,10 @@ Scarcity:      Rev = (D_f/N)·min((1/u)^ρ, S_max)
 
 | Scenario | Story | 2024 Rev/Firm | 10yr NPV |
 |----------|-------|---------------|----------|
-| **Base** | Moderate competition, 4 firms, uncertain break-even | ~$1.0B | -$184B |
-| **Bear** | 5 aggressive investors, commodity market, OS eats margins | ~$0.1B | -$213B |
-| **Bull** | 3 differentiated firms, strong moats, fast adoption | ~$2.1B | +$20B |
-| **AGI Shock** | Transformative demand explosion ($150B+ TAM) | ~$2.1B | +$658B |
+| **Base** | Moderate competition, 4 firms, breaks even by 2030 | ~$1.0B | +$287B |
+| **Bear** | 5 aggressive investors, commodity market, OS eats margins | ~$0.1B | -$280B |
+| **Bull** | 3 differentiated firms, strong moats, fast adoption | ~$2.1B | +$2,155B |
+| **AGI Shock** | Transformative demand explosion ($150B+ TAM) | ~$2.1B | +$9,004B |
 
 Base case calibrated to ~$1B revenue / ~$2.4B cost per firm in 2024.
 
