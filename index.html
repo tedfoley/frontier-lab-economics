@@ -404,6 +404,11 @@ padding:.5rem;margin-bottom:1rem;box-shadow:var(--shadow)}
     <p style="margin-top:.5rem;color:var(--muted);font-size:.82rem">Charts use Base Case parameters and are computed once on first load.
       <button onclick="recalcSensitivity()" style="margin-left:.6rem;padding:.25rem .7rem;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--primary);font-size:.8rem;cursor:pointer">&#8635; Recalculate</button>
     </p>
+    <div style="margin-top:.6rem;display:flex;align-items:center;gap:.6rem;font-size:.85rem">
+      <label for="sens-pct" style="color:var(--muted)">Sensitivity Swing:</label>
+      <input id="sens-pct" type="range" min="1" max="50" value="10" style="width:140px" oninput="document.getElementById('sens-pct-val').textContent=this.value+'%'; recalcSensitivity()">
+      <span id="sens-pct-val" style="font-weight:600;min-width:2.5rem">10%</span>
+    </div>
   </div>
   <div class="chart-box"><div id="chart-tornado" style="height:560px"></div></div>
   <div class="section-header" style="margin-top:2rem">
@@ -1028,37 +1033,43 @@ function updateScenarios() {
     shapes: [zeroLine] }), plotCfg);
 }
 
-function updateSensitivity() {
-  // Tornado chart
+function updateTornado() {
+  // Tornado chart: ±X% sensitivity around each base parameter
   var sensParams = [
-    ['TAM0', 25, 120, 'Total Addressable Market'],
-    ['D0', 0.04, 0.18, 'Initial Adoption Rate'],
-    ['Dmax', 0.35, 0.75, 'Max Adoption'],
-    ['nFrontier', 6, 2, '# Frontier Labs'],
-    ['gamma', 0.95, 0.45, 'Substitutability (gamma)'],
-    ['capexGrowth', 2.50, 0.80, 'Capex Growth Rate'],
-    ['initialCapex', 3.0, 0.5, 'Yr 1 Compute ($B)'],
-    ['theta', 0.35, 0.75, 'Inference Split (theta)'],
-    ['osQuality0', 0.75, 0.25, 'OS Quality'],
-    ['osSub', 0.65, 0.20, 'OS Substitutability'],
-    ['phi', 0.75, 0.25, '% Contestable by OS'],
-    ['switchCost0', 0.02, 0.30, 'Switching Costs'],
-    ['gCapBase', 0.20, 0.40, 'TAM Growth Rate'],
-    ['lambda', 0.02, 0.10, 'Training → TAM Feedback'],
-    ['sigmaBase', 2.50, 0.80, 'Overcapacity Sensitivity'],
-    ['Smax', 1.05, 2.00, 'Max Scarcity Premium'],
-    ['capexDecel', 0.90, 0.35, 'Growth Deceleration'],
-    ['talentCost0', 1.5, 0.2, 'Talent Cost ($B)'],
-    ['rho', 0.10, 0.50, 'Scarcity Power (rho)']
+    ['TAM0', 'Total Addressable Market'],
+    ['D0', 'Initial Adoption Rate'],
+    ['Dmax', 'Max Adoption'],
+    ['nFrontier', '# Frontier Labs'],
+    ['gamma', 'Substitutability (gamma)'],
+    ['capexGrowth', 'Capex Growth Rate'],
+    ['initialCapex', 'Yr 1 Compute ($B)'],
+    ['theta', 'Inference Split (theta)'],
+    ['osQuality0', 'OS Quality'],
+    ['osSub', 'OS Substitutability'],
+    ['phi', '% Contestable by OS'],
+    ['switchCost0', 'Switching Costs'],
+    ['gCapBase', 'TAM Growth Rate'],
+    ['lambda', 'Training → TAM Feedback'],
+    ['sigmaBase', 'Overcapacity Sensitivity'],
+    ['Smax', 'Max Scarcity Premium'],
+    ['capexDecel', 'Growth Deceleration'],
+    ['talentCost0', 'Talent Cost ($B)'],
+    ['rho', 'Scarcity Power (rho)']
   ];
+  var sensPctInput = document.getElementById('sens-pct');
+  var sensPct = sensPctInput ? parseInt(sensPctInput.value) / 100 : 0.10;
+  var sensPctLabel = Math.round(sensPct * 100);
   var baseNpv = runSim(BASE).npvCum[9];
   var impacts = [];
   sensParams.forEach(function(sp) {
-    var pLow = Object.assign({}, BASE); pLow[sp[0]] = sp[1];
-    var pHigh = Object.assign({}, BASE); pHigh[sp[0]] = sp[2];
+    var pLow = Object.assign({}, BASE); pLow[sp[0]] = BASE[sp[0]] * (1 - sensPct);
+    var pHigh = Object.assign({}, BASE); pHigh[sp[0]] = BASE[sp[0]] * (1 + sensPct);
     var nL = runSim(pLow).npvCum[9] - baseNpv;
     var nH = runSim(pHigh).npvCum[9] - baseNpv;
-    impacts.push({ name: sp[3], low: nL, high: nH, range: Math.abs(nH - nL) });
+    // Assign green (optimistic) to whichever direction improves NPV
+    var optimistic = Math.max(nL, nH);
+    var pessimistic = Math.min(nL, nH);
+    impacts.push({ name: sp[1], low: pessimistic, high: optimistic, range: Math.abs(nH - nL) });
   });
   impacts.sort(function(a, b) { return a.range - b.range; });
   var names = impacts.map(function(i) { return i.name; });
@@ -1070,14 +1081,16 @@ function updateSensitivity() {
     { y: names, x: lows, type: 'bar', orientation: 'h', name: 'Pessimistic',
       marker: { color: 'rgba(220,38,38,0.7)' } }
   ], Object.assign({}, plotLayout, {
-    title: 'Sensitivity: Change in 10-Year NPV ($B)', barmode: 'overlay',
+    title: 'Sensitivity \u00b1' + sensPctLabel + '%: Change in 10-Year NPV ($B)', barmode: 'overlay',
     margin: { l: 200, r: 30, t: 40, b: 50 },
-    xaxis: Object.assign({}, plotLayout.xaxis, { title: 'Change in NPV ($B)', zeroline: true, zerolinewidth: 2 }),
+    xaxis: { title: 'Change in NPV ($B)', zeroline: true, zerolinewidth: 2, gridcolor: '#e2e8f0' },
     yaxis: { automargin: true }
   }), plotCfg);
+}
 
+function updateHeatmap() {
   // Break-even heatmap: TAM0 vs gamma
-  var tRows = 25, gRows = 25;
+  var tRows = 15, gRows = 15;
   var tRange = [], gRange = [], zData = [];
   for (var ti = 0; ti < tRows; ti++) { tRange.push(15 + ti * 150 / (tRows - 1)); }
   for (var gi = 0; gi < gRows; gi++) { gRange.push(0.30 + gi * 0.65 / (gRows - 1)); }
@@ -1090,34 +1103,46 @@ function updateSensitivity() {
     }
     zData.push(row);
   }
-  var xLabels = tRange.map(function(t) { return '$' + t.toFixed(0) + 'B'; });
-  var yLabels = gRange.map(function(g) { return g.toFixed(2); });
+  // Compute symmetric colorscale around median value
+  var allVals = [];
+  for (var ri = 0; ri < zData.length; ri++) {
+    for (var ci = 0; ci < zData[ri].length; ci++) { allVals.push(zData[ri][ci]); }
+  }
+  allVals.sort(function(a, b) { return a - b; });
+  var zSpread = Math.max(Math.abs(allVals[0]), Math.abs(allVals[allVals.length - 1]));
+  var zMin = -zSpread;
+  var zMax = zSpread;
 
   Plotly.react('chart-breakeven', [{
-    z: zData, x: xLabels, y: yLabels,
+    z: zData, x: tRange, y: gRange,
     type: 'heatmap', colorscale: [[0, '#dc2626'], [0.5, '#fefce8'], [1, '#16a34a']],
-    zmid: 0, colorbar: { title: 'NPV ($B)' }
+    zmin: zMin, zmax: zMax, colorbar: { title: 'NPV ($B)' }
   }, {
-    x: xLabels, y: yLabels, z: zData,
+    x: tRange, y: gRange, z: zData,
     type: 'contour', contours: { start: 0, end: 0, size: 1 }, showscale: false,
     line: { color: 'black', width: 3 }, ncontours: 1
   }], Object.assign({}, plotLayout, {
     title: 'Break-Even Frontier: TAM vs. Substitutability',
     margin: { l: 60, r: 30, t: 40, b: 60 },
-    xaxis: { title: 'Total Addressable Market (TAM₀)' },
+    xaxis: { title: 'Total Addressable Market (TAM₀)', tickprefix: '$', ticksuffix: 'B' },
     yaxis: { title: 'Substitutability (gamma)' },
     annotations: [
-      { x: '$' + BASE.TAM0 + 'B', y: BASE.gamma.toFixed(2), text: '<b>Base</b>',
+      { x: BASE.TAM0, y: BASE.gamma, text: '<b>Base</b>',
         showarrow: true, arrowhead: 2, ax: 40, ay: -35,
         font: { size: 12, color: '#1e293b' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 },
-      { x: '$' + PRESETS.bear.TAM0 + 'B', y: PRESETS.bear.gamma.toFixed(2), text: '<b>Bear</b>',
+      { x: PRESETS.bear.TAM0, y: PRESETS.bear.gamma, text: '<b>Bear</b>',
         showarrow: true, arrowhead: 2, ax: -55, ay: 5,
         font: { size: 12, color: '#dc2626' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 },
-      { x: '$' + PRESETS.bull.TAM0 + 'B', y: PRESETS.bull.gamma.toFixed(2), text: '<b>Bull</b>',
+      { x: PRESETS.bull.TAM0, y: PRESETS.bull.gamma, text: '<b>Bull</b>',
         showarrow: true, arrowhead: 2, ax: 10, ay: 45,
         font: { size: 12, color: '#16a34a' }, bgcolor: 'rgba(255,255,255,0.85)', borderpad: 3 }
     ]
   }), plotCfg);
+}
+
+function updateSensitivity() {
+  updateTornado();
+  updateHeatmap();
 }
 
 // ================================================================
@@ -1140,7 +1165,7 @@ function loadPreset(name) {
 
 // Tab switching
 var _sensComputed = false;
-function recalcSensitivity() { _sensComputed = false; updateSensitivity(); _sensComputed = true; }
+function recalcSensitivity() { _sensComputed = false; updateTornado(); _sensComputed = true; }
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -1154,6 +1179,7 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
 
 // Slider & checkbox events
 document.querySelectorAll('input[type=range]').forEach(function(s) {
+  if (s.id === 'sens-pct') return; // skip sensitivity slider — it has its own handler
   s.addEventListener('input', function() { updateLabels(); updateSimCharts(); });
 });
 document.getElementById('s-entryExit').addEventListener('change', function() {
